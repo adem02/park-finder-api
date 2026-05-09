@@ -1,0 +1,7 @@
+export const PARKING_NAME_MIN_LENGTH = 3;
+export const PARKING_NAME_MAX_LENGTH = 100;
+export const PARKING_TOTAL_SPOTS_MIN = 1;
+export const PARKING_TOTAL_SPOTS_MAX = 1000;
+export const PARKING_MAX_PHOTOS = 3;
+export const MODERATION_THRESHOLD = -5;
+export const VERIFIED_THRESHOLD = 10;
