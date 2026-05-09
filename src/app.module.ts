@@ -6,9 +6,11 @@ import { validateEnv } from './config/env.validation';
 import databaseConfig from './config/database.config';
 import redisConfig from './config/redis.config';
 import appConfig from './config/app.config';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
+    CommonModule,
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
