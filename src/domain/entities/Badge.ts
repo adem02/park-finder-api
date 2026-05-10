@@ -1,6 +1,6 @@
 import { BADGE_CATALOG } from '../constants/badge.constants';
 import { BadgeCriteria, BadgeName, BadgeType } from '../types/badge.types';
-import { InvalidBadgeTresholdException } from '../exceptions/InvalidBadgeTreshold.exception';
+import { InvalidBadgeThresholdException } from '../exceptions/InvalidBadgeThreshold.exception';
 
 interface BadgeParams {
   id: string;
@@ -21,7 +21,7 @@ export class Badge {
 
   static create(params: BadgeParams) {
     if (params.criteria.threshold <= 0) {
-      throw new InvalidBadgeTresholdException(
+      throw new InvalidBadgeThresholdException(
         'Badge criteria threshold must be greater than 0.',
       );
     }
