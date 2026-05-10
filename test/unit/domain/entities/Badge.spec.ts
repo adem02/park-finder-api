@@ -5,7 +5,7 @@ import {
   BadgeName,
   BadgeType,
 } from '../../../../src/domain/types/badge.types';
-import { InvalidBadgeTresholdException } from '../../../../src/domain/exceptions/InvalidBadgeTreshold.exception';
+import { InvalidBadgeThresholdException } from '../../../../src/domain/exceptions/InvalidBadgeThreshold.exception';
 
 const makeValidParams = (
   overrides: Partial<Parameters<typeof Badge.create>[0]> = {},
@@ -54,7 +54,7 @@ describe('Badge', () => {
             criteria: { type: 'parkings_added', threshold: 0 },
           }),
         ),
-      ).toThrow(InvalidBadgeTresholdException);
+      ).toThrow(InvalidBadgeThresholdException);
     });
 
     it('should throw when threshold is negative', () => {
@@ -64,7 +64,7 @@ describe('Badge', () => {
             criteria: { type: 'parkings_added', threshold: -5 },
           }),
         ),
-      ).toThrow(InvalidBadgeTresholdException);
+      ).toThrow(InvalidBadgeThresholdException);
     });
   });
 
