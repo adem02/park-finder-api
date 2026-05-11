@@ -2,7 +2,7 @@ import { UserCredentials } from '../../domain/entities/UserCredentials';
 import { Provider } from '../../domain/types/auth.types';
 
 export interface CredentialsRepository {
-  findByUserId(userId: string): Promise<UserCredentials[]>;
+  findByUserId(userId: string): Promise<UserCredentials | null>;
   findByProviderId(
     provider: Provider,
     providerId: string,

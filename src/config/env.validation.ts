@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsIn,
   validateSync,
+  IsUUID,
 } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { Type } from 'class-transformer';
@@ -26,7 +27,6 @@ class EnvironmentVariables {
   @IsOptional()
   BASE_URL: string = 'http://localhost:3000';
 
-  // Database
   @IsString()
   DB_USER!: string;
 
@@ -46,9 +46,38 @@ class EnvironmentVariables {
   @IsString()
   DATABASE_URL!: string;
 
-  // Redis
   @IsString()
   REDIS_URL!: string;
+
+  @IsUUID()
+  JWT_SECRET!: string;
+
+  @IsString()
+  JWT_EXPIRES_IN!: string;
+
+  @IsString()
+  GOOGLE_CLIENT_ID!: string;
+
+  @IsString()
+  GOOGLE_CLIENT_SECRET!: string;
+
+  @IsString()
+  GOOGLE_CALLBACK_URL!: string;
+
+  @IsString()
+  APPLE_CLIENT_ID!: string;
+
+  @IsString()
+  APPLE_TEAM_ID!: string;
+
+  @IsString()
+  APPLE_KEY_ID!: string;
+
+  @IsString()
+  APPLE_PRIVATE_KEY!: string;
+
+  @IsString()
+  APPLE_CALLBACK_URL!: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

@@ -9,8 +9,8 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    response.status(422).json({
-      statusCode: 422,
+    response.status(exception.statusCode).json({
+      statusCode: exception.statusCode,
       message: exception.message,
       error: exception.name,
       path: request.url,
