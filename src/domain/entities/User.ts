@@ -39,4 +39,16 @@ export class User {
       params.photoUrl,
     );
   }
+
+  static reconstitute(params: UserParams) {
+    return new User(
+      params.id,
+      params.username,
+      params.pointsBalance,
+      params.createdAt,
+      params.updatedAt,
+      params.email,
+      params.photoUrl,
+    );
+  }
 }

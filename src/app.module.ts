@@ -11,9 +11,11 @@ import googleConfig from './config/google.config';
 import appleConfig from './config/apple.config';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PrismaModule } from './infrastructure/orm/prisma/prisma.module';
 
 @Module({
   imports: [
+    PrismaModule,
     AuthModule,
     CommonModule,
     ConfigModule.forRoot({
