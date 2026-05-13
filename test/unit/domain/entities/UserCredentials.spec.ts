@@ -99,4 +99,43 @@ describe('UserCredentials', () => {
       });
     });
   });
+
+  describe('reconstitue', () => {
+    it('should reconstitue local credentials with all fields', () => {
+      const params = makeValidLocalParams();
+      const cred = UserCredentials.reconstitue(params);
+
+      expect(cred.id).toBe(params.id);
+      expect(cred.userId).toBe(params.userId);
+      expect(cred.provider).toBe('local');
+      expect(cred.passwordHash).toBe(params.passwordHash);
+      expect(cred.firstName).toBe(params.firstName);
+      expect(cred.lastName).toBe(params.lastName);
+      expect(cred.photoUrl).toBe(params.photoUrl);
+    });
+
+    it('should bypass validation for local credentials without passwordHash', () => {
+      const cred = UserCredentials.reconstitue(
+        makeValidLocalParams({ passwordHash: undefined }),
+      );
+      expect(cred.passwordHash).toBeUndefined();
+    });
+
+    it('should bypass validation for OAuth credentials without providerId', () => {
+      const cred = UserCredentials.reconstitue(
+        makeValidOAuthParams({ providerId: undefined }),
+      );
+      expect(cred.providerId).toBeUndefined();
+    });
+
+    it('should reconstitue OAuth credentials with all fields', () => {
+      const params = makeValidOAuthParams();
+      const cred = UserCredentials.reconstitue(params);
+
+      expect(cred.id).toBe(params.id);
+      expect(cred.userId).toBe(params.userId);
+      expect(cred.provider).toBe('google');
+      expect(cred.providerId).toBe(params.providerId);
+    });
+  });
 });

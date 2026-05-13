@@ -16,8 +16,8 @@ import { AuthGuard } from './guards/JwtAuth.guard';
 import { GoogleStrategy } from './strategies/Google.strategy';
 import { AppleStrategy } from './strategies/Apple.strategy';
 import { OAuthUseCase } from '../../application/auth/OAuth.use-case';
-import { PrismaUserRepository } from '../../infrastructure/repositories/PrismaUser.repository';
-import { PrismaCredentialsRepository } from '../../infrastructure/repositories/PrismaCredentials.repository';
+import { PrismaUserRepository } from '../../infrastructure/orm/repositories/PrismaUser.repository';
+import { PrismaCredentialsRepository } from '../../infrastructure/orm/repositories/PrismaCredentials.repository';
 import { RefreshTokenUseCase } from '../../application/auth/RefreshToken.use-case';
 
 @Module({

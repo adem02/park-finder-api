@@ -5,10 +5,168 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../src/infrastructure/orm/prisma/generated"
   moduleFormat = "cjs"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [postgis]
+}
+
+enum Provider {
+  local
+  google
+  apple
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+model User {
+  id String @id
+  username String @unique
+  email String? @unique
+  photoUrl String?
+  points Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  credentials UserCredentials?
+  parkings Parking[]
+  availabilityReports AvailabilityReport[]
+  votes Vote[]
+  comments Comment[]
+  userBadges UserBadge[]
+  leaderboardEntries MonthlyLeaderboard[]
+
+  @@map("users")
+}
+
+model UserCredentials {
+  id String @id
+  userId String @unique
+  provider Provider
+  providerId String?
+  passwordHash String?
+  firstName String?
+  lastName String?
+  photoUrl String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@map("user_credentials")
+}
+
+model Parking {
+  id String @id
+  name String
+  totalSpots Int
+  photos String[]
+  latitude Float
+  longitude Float
+  location Unsupported("geography(Point, 4326)")?
+  addedById String
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  addedBy User @relation(fields: [addedById], references: [id], onDelete: Cascade)
+
+  availabilityReports AvailabilityReport[]
+  votes Vote[]
+  comments Comment[]
+
+  @@index([location], type: Gist)
+  @@map("parkings")
+}
+
+model AvailabilityReport {
+  id String @id
+  parkingId String
+  reportedById String
+  availableSpots Int
+  reportedAt DateTime
+  expiresAt DateTime
+  expired Boolean @default(false)
+
+  parking Parking @relation(fields: [parkingId], references: [id], onDelete: Cascade)
+  reportedBy User @relation(fields: [reportedById], references: [id], onDelete: Cascade)
+
+  @@index([parkingId, reportedAt(sort: Desc)])
+  @@index([expiresAt])
+  @@map("availability_reports")
+}
+
+model Vote {
+  id        String   @id
+  parkingId String
+  votedById String
+  voteType  VoteType
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  parking Parking @relation(fields: [parkingId], references: [id], onDelete: Cascade)
+  votedBy User    @relation(fields: [votedById], references: [id], onDelete: Cascade)
+
+  @@unique([parkingId, votedById])
+  @@map("votes")
+}
+
+model Comment {
+  id        String    @id
+  content   String    @db.VarChar(500)
+  parkingId String
+  authorId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  parking Parking @relation(fields: [parkingId], references: [id], onDelete: Cascade)
+  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([parkingId, createdAt(sort: Desc)])
+  @@map("comments")
+}
+
+model Badge {
+  id          String @id
+  name        String @unique
+  description String
+  iconUrl     String
+  criteriaType      String
+  criteriaThreshold Int
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model MonthlyLeaderboard {
+  id           String   @id
+  userId       String
+  month        String   // format "2026-04"
+  monthlyPoints Int     @default(0)
+  rank         Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
+  @@index([month, monthlyPoints(sort: Desc)])
+  @@map("monthly_leaderboard")
 }

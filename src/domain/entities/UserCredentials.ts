@@ -47,4 +47,17 @@ export class UserCredentials {
       params.photoUrl,
     );
   }
+
+  static reconstitue(params: UserCredentialsParams) {
+    return new UserCredentials(
+      params.id,
+      params.userId,
+      params.provider,
+      params.providerId,
+      params.passwordHash,
+      params.firstName,
+      params.lastName,
+      params.photoUrl,
+    );
+  }
 }

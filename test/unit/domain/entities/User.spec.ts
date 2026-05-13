@@ -74,4 +74,37 @@ describe('User', () => {
       );
     });
   });
+
+  describe('reconstitute', () => {
+    it('should reconstitute a user with all fields', () => {
+      const params = makeValidParams();
+      const user = User.reconstitute(params);
+
+      expect(user.id).toBe(params.id);
+      expect(user.username).toBe(params.username);
+      expect(user.email).toBe(params.email);
+      expect(user.photoUrl).toBe(params.photoUrl);
+      expect(user.pointsBalance).toBe(params.pointsBalance);
+      expect(user.createdAt).toBe(params.createdAt);
+      expect(user.updatedAt).toBe(params.updatedAt);
+    });
+
+    it('should reconstitute a user without optional fields', () => {
+      const params = makeValidParams({
+        email: undefined,
+        photoUrl: undefined,
+        updatedAt: undefined,
+      });
+      const user = User.reconstitute(params);
+
+      expect(user.email).toBeUndefined();
+      expect(user.photoUrl).toBeUndefined();
+      expect(user.updatedAt).toBeUndefined();
+    });
+
+    it('should bypass username length validation', () => {
+      const user = User.reconstitute(makeValidParams({ username: 'ab' }));
+      expect(user.username).toBe('ab');
+    });
+  });
 });
