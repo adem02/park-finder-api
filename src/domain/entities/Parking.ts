@@ -54,12 +54,19 @@ export class Parking {
       );
     }
 
-    if (params.photos.length > PARKING_MAX_PHOTOS) {
-      throw new ParkingPhotosMaxLengthExceededException(
-        'A parking can have a maximum of 3 photos.',
-      );
-    }
+    return new Parking(
+      params.id,
+      params.name,
+      params.totalSpots,
+      [],
+      params.coordinates,
+      params.addedBy,
+      params.createdAt,
+      params.updatedAt,
+    );
+  }
 
+  static reconstitute(params: ParkingParams) {
     return new Parking(
       params.id,
       params.name,
@@ -78,5 +85,23 @@ export class Parking {
    */
   isNearTo(other: CoordinatesVO): boolean {
     return this.coordinates.distanceTo(other) < DUPLICATE_PARKING_RADIUS_METERS;
+  }
+
+  addPhotos(photos: ReadonlyArray<string>) {
+    if (photos.length > PARKING_MAX_PHOTOS) {
+      throw new ParkingPhotosMaxLengthExceededException(
+        'A parking can have a maximum of 3 photos.',
+      );
+    }
+    return new Parking(
+      this.id,
+      this.name,
+      this.totalSpots,
+      photos,
+      this.coordinates,
+      this.addedBy,
+      this.createdAt,
+      this.updatedAt,
+    );
   }
 }

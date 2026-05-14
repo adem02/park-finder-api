@@ -47,7 +47,7 @@ describe('Parking', () => {
       expect(parking.id).toBe(params.id);
       expect(parking.name).toBe(params.name);
       expect(parking.totalSpots).toBe(params.totalSpots);
-      expect(parking.photos).toBe(params.photos);
+      expect(parking.photos).toEqual([]);
       expect(parking.coordinates).toBe(params.coordinates);
       expect(parking.addedBy).toBe(params.addedBy);
       expect(parking.createdAt).toBe(params.createdAt);
@@ -115,12 +115,29 @@ describe('Parking', () => {
       ).toThrow(InvalidParkingTotalSpotsException);
     });
 
-    it(`should accept exactly ${PARKING_MAX_PHOTOS} photos`, () => {
+    it('should always start with no photos', () => {
       const photos = Array.from(
         { length: PARKING_MAX_PHOTOS },
         (_, i) => `https://example.com/photo${i}.jpg`,
       );
       const parking = Parking.create(makeValidParams({ photos }));
+      expect(parking.photos).toEqual([]);
+    });
+  });
+
+  describe('addPhotos', () => {
+    it('should return a new parking with the provided photos', () => {
+      const photos = ['https://example.com/photo1.jpg'];
+      const parking = Parking.create(makeValidParams()).addPhotos(photos);
+      expect(parking.photos).toEqual(photos);
+    });
+
+    it(`should accept exactly ${PARKING_MAX_PHOTOS} photos`, () => {
+      const photos = Array.from(
+        { length: PARKING_MAX_PHOTOS },
+        (_, i) => `https://example.com/photo${i}.jpg`,
+      );
+      const parking = Parking.create(makeValidParams()).addPhotos(photos);
       expect(parking.photos).toHaveLength(PARKING_MAX_PHOTOS);
     });
 
@@ -129,9 +146,34 @@ describe('Parking', () => {
         { length: PARKING_MAX_PHOTOS + 1 },
         (_, i) => `https://example.com/photo${i}.jpg`,
       );
-      expect(() => Parking.create(makeValidParams({ photos }))).toThrow(
+      expect(() => Parking.create(makeValidParams()).addPhotos(photos)).toThrow(
         ParkingPhotosMaxLengthExceededException,
       );
+    });
+
+    it('should accept an empty array', () => {
+      const parking = Parking.create(makeValidParams()).addPhotos([]);
+      expect(parking.photos).toEqual([]);
+    });
+
+    it('should preserve all other fields', () => {
+      const params = makeValidParams();
+      const parking = Parking.create(params).addPhotos([
+        'https://example.com/photo.jpg',
+      ]);
+      expect(parking.id).toBe(params.id);
+      expect(parking.name).toBe(params.name);
+      expect(parking.totalSpots).toBe(params.totalSpots);
+      expect(parking.coordinates).toBe(params.coordinates);
+      expect(parking.addedBy).toBe(params.addedBy);
+      expect(parking.createdAt).toBe(params.createdAt);
+    });
+
+    it('should return a new instance, not mutate the original', () => {
+      const original = Parking.create(makeValidParams());
+      const updated = original.addPhotos(['https://example.com/photo.jpg']);
+      expect(original.photos).toEqual([]);
+      expect(updated.photos).toHaveLength(1);
     });
   });
 
