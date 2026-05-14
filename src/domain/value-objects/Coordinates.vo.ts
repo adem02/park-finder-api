@@ -32,6 +32,10 @@ export class CoordinatesVO {
     return new CoordinatesVO(latitude, longitude);
   }
 
+  static reconstruct(latitude: number, longitude: number): CoordinatesVO {
+    return new CoordinatesVO(latitude, longitude);
+  }
+
   /**
    * Returns the distance in meters between two coordinates using the Haversine formula.
    */

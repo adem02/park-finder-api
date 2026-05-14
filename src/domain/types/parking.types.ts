@@ -6,6 +6,7 @@ export interface FindNearByOptions {
   available?: boolean;
   minSpots?: number;
   verified?: boolean;
+  limit?: number;
 }
 
 export interface ParkingWithScore {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ExceptionFilter,
   Catch,
   ArgumentsHost,
@@ -25,9 +26,11 @@ export class CatchEverythingFilter implements ExceptionFilter {
 
     const request = ctx.getRequest<Request>();
     const message =
-      exception instanceof HttpException
-        ? exception.message
-        : 'Internal server error';
+      exception instanceof BadRequestException
+        ? exception.getResponse()
+        : exception instanceof HttpException
+          ? exception.message
+          : 'Internal server error';
 
     if (!(exception instanceof HttpException)) {
       this.logger.error(exception);
