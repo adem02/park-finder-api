@@ -14,3 +14,5 @@ export interface ParkingWithScore {
   score: ParkingScoreVO;
   votesCount: number;
 }
+
+export type ParkingRadius = 500 | 1000 | 2000 | 5000 | 10000;
