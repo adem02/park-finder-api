@@ -12,6 +12,7 @@ import { ParkingController } from './parking.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { GetParkingDetailsUseCase } from '../../application/parking/GetParkingDetails.use-case';
+import { FindNearbyParkingsUseCase } from '../../application/parking/FindNearbyParkings.use-case';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { GetParkingDetailsUseCase } from '../../application/parking/GetParkingDe
     },
     AddNewParkingUseCase,
     GetParkingDetailsUseCase,
+    FindNearbyParkingsUseCase,
   ],
 })
 export class ParkingModule {}
