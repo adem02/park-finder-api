@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   UploadedFiles,
   UseInterceptors,
@@ -12,10 +14,15 @@ import type { DecodedToken } from '../../application/types/auth.types';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { ParkingPhoto } from '../../application/types/parking.types';
 import { FileValidationPipe } from '../../common/pipes/FileValidation.pipe';
+import { GetParkingDetailsUseCase } from '../../application/parking/GetParkingDetails.use-case';
+import { GetParkingDetailsOutputDTO } from './dto/GetParkingDetails.dto';
 
 @Controller('parkings')
 export class ParkingController {
-  constructor(private readonly addNewParkingUseCase: AddNewParkingUseCase) {}
+  constructor(
+    private readonly addNewParkingUseCase: AddNewParkingUseCase,
+    private readonly getParkingDetailsUseCase: GetParkingDetailsUseCase,
+  ) {}
 
   @Post('new')
   @UseInterceptors(FilesInterceptor('photos', 3))
@@ -38,5 +45,12 @@ export class ParkingController {
     });
 
     return response;
+  }
+
+  @Get(':id')
+  async getParkingDetails(@Param('id') id: string) {
+    const response = await this.getParkingDetailsUseCase.execute({ id });
+
+    return new GetParkingDetailsOutputDTO(response);
   }
 }
