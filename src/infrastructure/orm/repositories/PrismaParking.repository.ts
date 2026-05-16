@@ -34,8 +34,13 @@ export class PrismaParkingRepository implements ParkingRepository {
     return data.map((row) => ParkingMapper.toDomain(row));
   }
 
-  findById(_id: string): Promise<Parking | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: string): Promise<Parking | null> {
+    const parking = await this.prismaService.parking.findUnique({
+      where: { id },
+      include: { addedBy: true },
+    });
+
+    return parking !== null ? ParkingMapper.toDomain(parking) : null;
   }
 
   async create(parking: Parking): Promise<void> {

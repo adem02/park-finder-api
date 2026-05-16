@@ -11,6 +11,7 @@ import { CloudinaryStorageService } from '../../infrastructure/cloudinary/Cloudi
 import { ParkingController } from './parking.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { GetParkingDetailsUseCase } from '../../application/parking/GetParkingDetails.use-case';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { memoryStorage } from 'multer';
       useClass: PrismaUserRepository,
     },
     AddNewParkingUseCase,
+    GetParkingDetailsUseCase,
   ],
 })
 export class ParkingModule {}
