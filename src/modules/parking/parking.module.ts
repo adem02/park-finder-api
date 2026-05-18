@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AddNewParkingUseCase } from '../../application/parking/AddNewParking.use-case';
 import {
+  AVAILABILITY_REPOSITORY,
   PARKING_REPOSITORY,
   STORAGE_SERVICE,
   USER_REPOSITORY,
@@ -13,6 +14,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { GetParkingDetailsUseCase } from '../../application/parking/GetParkingDetails.use-case';
 import { FindNearbyParkingsUseCase } from '../../application/parking/FindNearbyParkings.use-case';
+import { PrismaAvailabilityRepository } from '../../infrastructure/orm/repositories/PrismaAvailability.repository';
+import { ReportAvailabilityUseCase } from '../../application/report/ReportAvailability.use-case';
 
 @Module({
   imports: [
@@ -34,9 +37,14 @@ import { FindNearbyParkingsUseCase } from '../../application/parking/FindNearbyP
       provide: USER_REPOSITORY,
       useClass: PrismaUserRepository,
     },
+    {
+      provide: AVAILABILITY_REPOSITORY,
+      useClass: PrismaAvailabilityRepository,
+    },
     AddNewParkingUseCase,
     GetParkingDetailsUseCase,
     FindNearbyParkingsUseCase,
+    ReportAvailabilityUseCase,
   ],
 })
 export class ParkingModule {}
