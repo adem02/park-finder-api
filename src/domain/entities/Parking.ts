@@ -79,6 +79,18 @@ export class Parking {
     );
   }
 
+  static placeholder(id: string, user: User) {
+    return new Parking(
+      id,
+      '',
+      0,
+      [],
+      CoordinatesVO.create(0, 0),
+      user,
+      new Date(),
+    );
+  }
+
   /**
    * Returns true if the given coordinates are within 50 meters of this parking.
    * Used to detect duplicate parkings.

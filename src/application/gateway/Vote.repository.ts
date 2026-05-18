@@ -8,5 +8,5 @@ export interface VoteRepository {
   findByParkingId(parkingId: string): Promise<Vote[]>;
   create(vote: Vote): Promise<void>;
   update(updatedVote: Vote): Promise<void>;
-  delete(parkingId: string, userId: string): Promise<void>;
+  cancelByParkingIdAndUserId(parkingId: string, userId: string): Promise<void>;
 }

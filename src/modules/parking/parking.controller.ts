@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -24,6 +25,9 @@ import {
 import { FindNearbyParkingsUseCase } from '../../application/parking/FindNearbyParkings.use-case';
 import { ReportAvailabilityInputDto } from './dto/ReportAvailabilityInputDto';
 import { ReportAvailabilityUseCase } from '../../application/report/ReportAvailability.use-case';
+import { VoteQueryDto } from './dto/Vote.dto';
+import { VoteUseCase } from '../../application/vote/Vote.use-case';
+import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
 
 @Controller('parkings')
 export class ParkingController {
@@ -32,6 +36,8 @@ export class ParkingController {
     private readonly getParkingDetailsUseCase: GetParkingDetailsUseCase,
     private readonly findNearbyParkingsUseCase: FindNearbyParkingsUseCase,
     private readonly reportAvailabilityUseCase: ReportAvailabilityUseCase,
+    private readonly voteUseCase: VoteUseCase,
+    private readonly cancelVoteUseCase: CancelVoteUseCase,
   ) {}
 
   @Post('new')
@@ -87,6 +93,27 @@ export class ParkingController {
       reporterId: user.userId,
       parkingId: id,
       availableSpots: body.availableSpots,
+    });
+  }
+
+  @Post(':id/vote')
+  async vote(
+    @Param('id') id: string,
+    @GetUser() user: DecodedToken,
+    @Query() query: VoteQueryDto,
+  ) {
+    await this.voteUseCase.execute({
+      userId: user.userId,
+      parkingId: id,
+      type: query.type,
+    });
+  }
+
+  @Delete(':id/vote')
+  async deleteVote(@Param('id') id: string, @GetUser() user: DecodedToken) {
+    await this.cancelVoteUseCase.execute({
+      parkingId: id,
+      userId: user.userId,
     });
   }
 }

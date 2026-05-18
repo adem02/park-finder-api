@@ -5,6 +5,7 @@ import {
   PARKING_REPOSITORY,
   STORAGE_SERVICE,
   USER_REPOSITORY,
+  VOTE_REPOSITORY,
 } from '../../common/constants/injection-tokens.constants';
 import { PrismaParkingRepository } from '../../infrastructure/orm/repositories/PrismaParking.repository';
 import { PrismaUserRepository } from '../../infrastructure/orm/repositories/PrismaUser.repository';
@@ -16,6 +17,9 @@ import { GetParkingDetailsUseCase } from '../../application/parking/GetParkingDe
 import { FindNearbyParkingsUseCase } from '../../application/parking/FindNearbyParkings.use-case';
 import { PrismaAvailabilityRepository } from '../../infrastructure/orm/repositories/PrismaAvailability.repository';
 import { ReportAvailabilityUseCase } from '../../application/report/ReportAvailability.use-case';
+import { PrismaVoteRepository } from '../../infrastructure/orm/repositories/PrismaVote.repository';
+import { VoteUseCase } from '../../application/vote/Vote.use-case';
+import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
 
 @Module({
   imports: [
@@ -41,10 +45,16 @@ import { ReportAvailabilityUseCase } from '../../application/report/ReportAvaila
       provide: AVAILABILITY_REPOSITORY,
       useClass: PrismaAvailabilityRepository,
     },
+    {
+      provide: VOTE_REPOSITORY,
+      useClass: PrismaVoteRepository,
+    },
     AddNewParkingUseCase,
     GetParkingDetailsUseCase,
     FindNearbyParkingsUseCase,
     ReportAvailabilityUseCase,
+    VoteUseCase,
+    CancelVoteUseCase,
   ],
 })
 export class ParkingModule {}
