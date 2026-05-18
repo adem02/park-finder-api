@@ -69,4 +69,11 @@ export class PrismaUserRepository implements UserRepository {
   findStatsByUserId(_userId: string): Promise<UserStats> {
     throw new Error('Method not implemented.');
   }
+
+  async updatePointsById(id: string, points: number): Promise<void> {
+    await this.prismaService.user.update({
+      where: { id },
+      data: { points: { increment: points } },
+    });
+  }
 }

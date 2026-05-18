@@ -22,6 +22,8 @@ import {
   FindNearbyParkingsQueryDto,
 } from './dto/FindNearbyParkings.dto';
 import { FindNearbyParkingsUseCase } from '../../application/parking/FindNearbyParkings.use-case';
+import { ReportAvailabilityInputDto } from './dto/ReportAvailabilityInputDto';
+import { ReportAvailabilityUseCase } from '../../application/report/ReportAvailability.use-case';
 
 @Controller('parkings')
 export class ParkingController {
@@ -29,6 +31,7 @@ export class ParkingController {
     private readonly addNewParkingUseCase: AddNewParkingUseCase,
     private readonly getParkingDetailsUseCase: GetParkingDetailsUseCase,
     private readonly findNearbyParkingsUseCase: FindNearbyParkingsUseCase,
+    private readonly reportAvailabilityUseCase: ReportAvailabilityUseCase,
   ) {}
 
   @Post('new')
@@ -61,7 +64,7 @@ export class ParkingController {
     return new GetParkingDetailsOutputDTO(response);
   }
 
-  @Get()
+  @Get('')
   async findNearBy(@Query() query: FindNearbyParkingsQueryDto) {
     const response = await this.findNearbyParkingsUseCase.execute({
       coordinates: {
@@ -72,5 +75,18 @@ export class ParkingController {
     });
 
     return new FindNearbyParkingsOutputDto(response);
+  }
+
+  @Post(':id/report')
+  async reportAvailability(
+    @Param('id') id: string,
+    @GetUser() user: DecodedToken,
+    @Body() body: ReportAvailabilityInputDto,
+  ) {
+    await this.reportAvailabilityUseCase.execute({
+      reporterId: user.userId,
+      parkingId: id,
+      availableSpots: body.availableSpots,
+    });
   }
 }
