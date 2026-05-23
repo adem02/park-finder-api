@@ -6,6 +6,7 @@ import { DomainExceptionFilter } from './filters/DomainException.filter';
 import { AuthGuard } from '../modules/auth/guards/JwtAuth.guard';
 import { AuthModule } from '../modules/auth/auth.module';
 import { APP_LOGGER } from './constants/injection-tokens.constants';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Global()
 @Module({
@@ -16,6 +17,10 @@ import { APP_LOGGER } from './constants/injection-tokens.constants';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_FILTER,

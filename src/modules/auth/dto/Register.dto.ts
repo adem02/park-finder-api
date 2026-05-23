@@ -5,12 +5,15 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import type { RegisterResponse } from '../../../application/auth/Register.use-case';
 
 export class RegisterInputDTO {
+  @ApiProperty({ example: 'john@example.com' })
   @IsEmail()
   email!: string;
 
+  @ApiProperty({ example: 'P@ssw0rd!', minLength: 6, maxLength: 20 })
   @IsString()
   @MinLength(6)
   @MaxLength(20)
@@ -20,6 +23,7 @@ export class RegisterInputDTO {
   })
   password!: string;
 
+  @ApiProperty({ example: 'johndoe', minLength: 3, maxLength: 50 })
   @IsString()
   @MinLength(3)
   @MaxLength(50)
@@ -27,12 +31,17 @@ export class RegisterInputDTO {
 }
 
 export class RegisterOutputDTO {
+  @ApiProperty({
+    example: { id: 'a1b2c3', username: 'johndoe', email: 'john@example.com' },
+  })
   readonly user: {
     id: string;
     username: string;
     email?: string;
     photoUrl?: string;
   };
+
+  @ApiProperty({ example: 'eyJhbGci...' })
   readonly accessToken: string;
 
   constructor(response: RegisterResponse) {
