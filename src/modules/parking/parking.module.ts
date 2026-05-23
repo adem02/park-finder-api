@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AddNewParkingUseCase } from '../../application/parking/AddNewParking.use-case';
 import {
   AVAILABILITY_REPOSITORY,
+  COMMENT_REPOSITORY,
   PARKING_REPOSITORY,
   STORAGE_SERVICE,
   USER_REPOSITORY,
@@ -20,6 +21,8 @@ import { ReportAvailabilityUseCase } from '../../application/report/ReportAvaila
 import { PrismaVoteRepository } from '../../infrastructure/orm/repositories/PrismaVote.repository';
 import { VoteUseCase } from '../../application/vote/Vote.use-case';
 import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
+import { CommentParkingUseCase } from '../../application/comment/CommentParking.use-case';
+import { PrismaCommentRepository } from '../../infrastructure/orm/repositories/PrismaComment.repository';
 
 @Module({
   imports: [
@@ -49,12 +52,17 @@ import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
       provide: VOTE_REPOSITORY,
       useClass: PrismaVoteRepository,
     },
+    {
+      provide: COMMENT_REPOSITORY,
+      useClass: PrismaCommentRepository,
+    },
     AddNewParkingUseCase,
     GetParkingDetailsUseCase,
     FindNearbyParkingsUseCase,
     ReportAvailabilityUseCase,
     VoteUseCase,
     CancelVoteUseCase,
+    CommentParkingUseCase,
   ],
 })
 export class ParkingModule {}
