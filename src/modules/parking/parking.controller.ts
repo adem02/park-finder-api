@@ -28,6 +28,8 @@ import { ReportAvailabilityUseCase } from '../../application/report/ReportAvaila
 import { VoteQueryDto } from './dto/Vote.dto';
 import { VoteUseCase } from '../../application/vote/Vote.use-case';
 import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
+import { CreateCommentInputDto } from './dto/CreateComment.dto';
+import { CommentParkingUseCase } from '../../application/comment/CommentParking.use-case';
 
 @Controller('parkings')
 export class ParkingController {
@@ -38,6 +40,7 @@ export class ParkingController {
     private readonly reportAvailabilityUseCase: ReportAvailabilityUseCase,
     private readonly voteUseCase: VoteUseCase,
     private readonly cancelVoteUseCase: CancelVoteUseCase,
+    private readonly commentUseCase: CommentParkingUseCase,
   ) {}
 
   @Post('new')
@@ -114,6 +117,19 @@ export class ParkingController {
     await this.cancelVoteUseCase.execute({
       parkingId: id,
       userId: user.userId,
+    });
+  }
+
+  @Post(':id/comments')
+  async comment(
+    @Param('id') id: string,
+    @GetUser() user: DecodedToken,
+    @Body() body: CreateCommentInputDto,
+  ) {
+    await this.commentUseCase.execute({
+      userId: user.userId,
+      parkingId: id,
+      content: body.content,
     });
   }
 }
