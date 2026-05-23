@@ -30,7 +30,15 @@ import { VoteUseCase } from '../../application/vote/Vote.use-case';
 import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
 import { CreateCommentInputDto } from './dto/CreateComment.dto';
 import { CommentParkingUseCase } from '../../application/comment/CommentParking.use-case';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('parkings')
 export class ParkingController {
   constructor(
@@ -45,6 +53,9 @@ export class ParkingController {
 
   @Post('new')
   @UseInterceptors(FilesInterceptor('photos', 3))
+  @ApiOperation({ summary: 'Add a new parking with up to 3 photos' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201, description: 'Parking created successfully' })
   async addNewParking(
     @GetUser() user: DecodedToken,
     @Body() body: NewParkingInputDto,
@@ -67,6 +78,10 @@ export class ParkingController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a parking details by its id' })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 200, type: GetParkingDetailsOutputDTO })
+  @ApiResponse({ status: 404, description: 'Parking not found' })
   async getParkingDetails(@Param('id') id: string) {
     const response = await this.getParkingDetailsUseCase.execute({ id });
 
@@ -74,6 +89,8 @@ export class ParkingController {
   }
 
   @Get('')
+  @ApiOperation({ summary: 'Find nearby parkings around given coordinates' })
+  @ApiResponse({ status: 200, type: FindNearbyParkingsOutputDto })
   async findNearBy(@Query() query: FindNearbyParkingsQueryDto) {
     const response = await this.findNearbyParkingsUseCase.execute({
       coordinates: {
@@ -87,6 +104,13 @@ export class ParkingController {
   }
 
   @Post(':id/report')
+  @ApiOperation({ summary: 'Report the current availability of a parking' })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Availability reported successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Parking or user not found' })
   async reportAvailability(
     @Param('id') id: string,
     @GetUser() user: DecodedToken,
@@ -100,6 +124,10 @@ export class ParkingController {
   }
 
   @Post(':id/vote')
+  @ApiOperation({ summary: 'Upvote or downvote a parking' })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 201, description: 'Vote registered successfully' })
+  @ApiResponse({ status: 404, description: 'Parking or user not found' })
   async vote(
     @Param('id') id: string,
     @GetUser() user: DecodedToken,
@@ -113,6 +141,10 @@ export class ParkingController {
   }
 
   @Delete(':id/vote')
+  @ApiOperation({ summary: 'Cancel the current user vote on a parking' })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 200, description: 'Vote cancelled successfully' })
+  @ApiResponse({ status: 404, description: 'Vote not found' })
   async deleteVote(@Param('id') id: string, @GetUser() user: DecodedToken) {
     await this.cancelVoteUseCase.execute({
       parkingId: id,
@@ -121,6 +153,10 @@ export class ParkingController {
   }
 
   @Post(':id/comments')
+  @ApiOperation({ summary: 'Post a comment on a parking' })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 201, description: 'Comment created successfully' })
+  @ApiResponse({ status: 404, description: 'Parking or user not found' })
   async comment(
     @Param('id') id: string,
     @GetUser() user: DecodedToken,

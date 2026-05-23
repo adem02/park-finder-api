@@ -1,6 +1,10 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { OAuthResponse } from '../../../application/auth/OAuth.use-case';
 
 export class OAuthOutputDTO {
+  @ApiProperty({
+    example: { id: 'a1b2c3', username: 'johndoe', email: 'john@example.com' },
+  })
   readonly user: {
     id: string;
     username: string;
@@ -8,6 +12,7 @@ export class OAuthOutputDTO {
     photoUrl?: string;
   };
 
+  @ApiProperty({ example: 'eyJhbGci...' })
   readonly accessToken: string;
 
   constructor(response: OAuthResponse) {

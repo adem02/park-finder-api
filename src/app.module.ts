@@ -14,6 +14,7 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './infrastructure/orm/prisma/prisma.module';
 import { ParkingModule } from './modules/parking/parking.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -33,6 +34,14 @@ import { ParkingModule } from './modules/parking/parking.module';
         googleConfig,
         appleConfig,
         cloudinaryConfig,
+      ],
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 100,
+        },
       ],
     }),
   ],
