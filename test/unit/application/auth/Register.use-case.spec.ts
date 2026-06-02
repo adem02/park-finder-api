@@ -25,6 +25,7 @@ const makeUserRepository = (
   findByUsername: jest.fn(),
   updateById: jest.fn(),
   deleteById: jest.fn(),
+  updatePointsById: jest.fn(),
   findStatsByUserId: jest.fn(),
   ...overrides,
 });

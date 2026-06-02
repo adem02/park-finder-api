@@ -44,6 +44,17 @@ export class AvailabilityReport {
     );
   }
 
+  static reconstitute(params: AvailabilityReportParams): AvailabilityReport {
+    return new AvailabilityReport(
+      params.id,
+      params.parking,
+      params.reportedBy,
+      params.availableSpots,
+      params.reportedAt,
+      AvailabilityWindowVO.create(params.reportedAt),
+    );
+  }
+
   get isExpired(): boolean {
     return this.window.isExpired;
   }

@@ -1,14 +1,55 @@
 import { Injectable } from '@nestjs/common';
-import { CommentRepository } from '../../../application/gateway';
+import { CommentCursor, CommentRepository } from '../../../application/gateway';
 import { Comment } from '../../../domain/entities/Comment';
 import { PrismaService } from '../prisma/Prisma.service';
+import { CommentMapper } from '../mapper/Comment.mapper';
 
 @Injectable()
 export class PrismaCommentRepository implements CommentRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  findByParkingId(_parkingId: string): Promise<Comment[]> {
-    throw new Error('Method not implemented.');
+  async findRecentByParkingId(
+    parkingId: string,
+    limit: number,
+  ): Promise<Comment[]> {
+    const comments = await this.prismaService.comment.findMany({
+      where: { parkingId },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      include: { author: true },
+    });
+
+    return comments.map((comment) => CommentMapper.toDomain(comment));
+  }
+
+  async findPageByParkingId(
+    parkingId: string,
+    cursor: CommentCursor | null,
+    limit: number,
+  ): Promise<Comment[]> {
+    const comments = await this.prismaService.comment.findMany({
+      where: {
+        parkingId,
+        ...(cursor
+          ? {
+              OR: [
+                { createdAt: { lt: cursor.createdAt } },
+                {
+                  AND: [
+                    { createdAt: cursor.createdAt },
+                    { id: { lt: cursor.id } },
+                  ],
+                },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      include: { author: true },
+    });
+
+    return comments.map((comment) => CommentMapper.toDomain(comment));
   }
 
   async create(comment: Comment): Promise<void> {
@@ -21,13 +62,5 @@ export class PrismaCommentRepository implements CommentRepository {
         createdAt: comment.createdAt,
       },
     });
-  }
-
-  updateById(_id: string, _updatedComment: Comment): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  deleteById(_id: string): Promise<void> {
-    throw new Error('Method not implemented.');
   }
 }

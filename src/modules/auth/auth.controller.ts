@@ -13,12 +13,7 @@ import { GetUser } from './decorators/get-user.decorator';
 import type { DecodedToken } from '../../application/types/auth.types';
 import { RefreshTokenOutputDTO } from './dto/RefreshToken.dto';
 import { Throttle } from '@nestjs/throttler';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Throttle({ default: { ttl: 60000, limit: 10 } })
 @Controller('auth')

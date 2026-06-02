@@ -26,8 +26,12 @@ export class PrismaVoteRepository implements VoteRepository {
     return vote !== null ? VoteMapper.toDomain(vote) : null;
   }
 
-  findByParkingId(_parkingId: string): Promise<Vote[]> {
-    throw new Error('Method not implemented.');
+  async findByParkingId(parkingId: string): Promise<Vote[]> {
+    const votes = await this.prismaService.vote.findMany({
+      where: { parkingId },
+    });
+
+    return votes.map((vote) => VoteMapper.toDomain(vote));
   }
 
   async create(vote: Vote): Promise<void> {

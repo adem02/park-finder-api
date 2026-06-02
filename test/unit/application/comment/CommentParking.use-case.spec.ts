@@ -36,9 +36,9 @@ const makeParkingRepository = (
   overrides: Partial<jest.Mocked<ParkingRepository>> = {},
 ): jest.Mocked<ParkingRepository> => ({
   findNearBy: jest.fn(),
+  findNearByWithDetails: jest.fn(),
   findById: jest.fn().mockResolvedValue(makeParking()),
   create: jest.fn(),
-  updateById: jest.fn(),
   findByUserId: jest.fn(),
   deleteById: jest.fn(),
   ...overrides,
@@ -61,10 +61,9 @@ const makeUserRepository = (
 const makeCommentRepository = (
   overrides: Partial<jest.Mocked<CommentRepository>> = {},
 ): jest.Mocked<CommentRepository> => ({
-  findByParkingId: jest.fn(),
+  findRecentByParkingId: jest.fn().mockResolvedValue([]),
+  findPageByParkingId: jest.fn().mockResolvedValue([]),
   create: jest.fn().mockResolvedValue(undefined),
-  updateById: jest.fn(),
-  deleteById: jest.fn(),
   ...overrides,
 });
 

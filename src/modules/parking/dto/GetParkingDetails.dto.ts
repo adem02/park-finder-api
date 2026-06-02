@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GetParkingDetailsResponse } from '../../../application/parking/GetParkingDetails.use-case';
+import { VoteType } from '../../../domain/types/vote.types';
+import { CommentResponseDto } from './Comment.dto';
 
 class CoordinatesResponseDto {
   @ApiProperty({ example: 48.8566 })
@@ -21,6 +23,32 @@ class AddedByResponseDto {
     required: false,
   })
   photoUrl?: string;
+}
+
+class AvailabilityResponseDto {
+  @ApiProperty({ example: 12, nullable: true })
+  availableSpots: number | null;
+
+  @ApiProperty({ nullable: true, required: false })
+  reportedAt: Date | null;
+
+  @ApiProperty({ example: true })
+  isRecent: boolean;
+}
+
+class VotesResponseDto {
+  @ApiProperty({ example: 12 })
+  upvotes: number;
+
+  @ApiProperty({ example: 2 })
+  downvotes: number;
+
+  @ApiProperty({
+    enum: VoteType,
+    nullable: true,
+    example: VoteType.UPVOTE,
+  })
+  userVote: VoteType | null;
 }
 
 export class GetParkingDetailsOutputDTO {
@@ -45,6 +73,15 @@ export class GetParkingDetailsOutputDTO {
   @ApiProperty({ type: AddedByResponseDto })
   readonly addedBy: AddedByResponseDto;
 
+  @ApiProperty({ type: AvailabilityResponseDto })
+  readonly availability: AvailabilityResponseDto;
+
+  @ApiProperty({ type: VotesResponseDto })
+  readonly votes: VotesResponseDto;
+
+  @ApiProperty({ type: [CommentResponseDto] })
+  readonly recentComments: CommentResponseDto[];
+
   @ApiProperty()
   readonly createdAt: Date;
 
@@ -52,7 +89,7 @@ export class GetParkingDetailsOutputDTO {
   readonly updatedAt?: Date;
 
   constructor(response: GetParkingDetailsResponse) {
-    const { parking } = response;
+    const { parking, latestReport, votes, userVote, recentComments } = response;
     const { addedBy } = parking;
 
     this.id = parking.id;
@@ -65,7 +102,30 @@ export class GetParkingDetailsOutputDTO {
       username: addedBy.username,
       photoUrl: addedBy.photoUrl,
     };
+
+    this.availability =
+      latestReport && !latestReport.isExpired
+        ? {
+            availableSpots: latestReport.availableSpots,
+            reportedAt: latestReport.reportedAt,
+            isRecent: latestReport.isRecent,
+          }
+        : { availableSpots: null, reportedAt: null, isRecent: false };
+
+    const upvotes = votes.filter(
+      (vote) => vote.voteType === VoteType.UPVOTE,
+    ).length;
+    this.votes = {
+      upvotes,
+      downvotes: votes.length - upvotes,
+      userVote: userVote?.voteType ?? null,
+    };
+
     this.createdAt = parking.createdAt;
     this.updatedAt = parking.updatedAt;
+
+    this.recentComments = recentComments.map(
+      (comment) => new CommentResponseDto(comment),
+    );
   }
 }

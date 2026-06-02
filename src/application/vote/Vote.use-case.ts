@@ -13,8 +13,8 @@ import { VoteType } from '../../domain/types/vote.types';
 import { ResourceNotFoundException } from '../../domain/exceptions/ResourceNotFound.exception';
 import { Vote } from '../../domain/entities/Vote';
 import { UuidGenerator } from '../../common/utils/UuidGenerator';
-import { POINTS_PER_ACTION } from '../../domain/constants/points.contants';
 import { AlreadyVotedException } from '../../domain/exceptions/AlreadyVoted.exception';
+import { AwardPointsUseCase } from '../points/AwardPoints.use-case';
 
 export interface VoteRequest {
   type: VoteType;
@@ -28,6 +28,7 @@ export class VoteUseCase {
     @Inject(VOTE_REPOSITORY) private readonly voteRepository: VoteRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(PARKING_REPOSITORY) private readonly parkingRepo: ParkingRepository,
+    private readonly awardPointsUseCase: AwardPointsUseCase,
   ) {}
 
   async execute(request: VoteRequest) {
@@ -63,10 +64,10 @@ export class VoteUseCase {
       });
       await this.voteRepository.create(newVote);
 
-      await this.userRepository.updatePointsById(
+      await this.awardPointsUseCase.execute({
         userId,
-        POINTS_PER_ACTION.VOTE_CAST,
-      );
+        action: 'VOTE_CAST',
+      });
 
       return;
     }

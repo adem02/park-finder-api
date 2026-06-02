@@ -30,6 +30,12 @@ import { VoteUseCase } from '../../application/vote/Vote.use-case';
 import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
 import { CreateCommentInputDto } from './dto/CreateComment.dto';
 import { CommentParkingUseCase } from '../../application/comment/CommentParking.use-case';
+import { ListParkingCommentsUseCase } from '../../application/comment/ListParkingComments.use-case';
+import {
+  ListParkingCommentsOutputDTO,
+  ListParkingCommentsQueryDto,
+  decodeCommentCursor,
+} from './dto/ListParkingComments.dto';
 import {
   ApiBearerAuth,
   ApiConsumes,
@@ -49,6 +55,7 @@ export class ParkingController {
     private readonly voteUseCase: VoteUseCase,
     private readonly cancelVoteUseCase: CancelVoteUseCase,
     private readonly commentUseCase: CommentParkingUseCase,
+    private readonly listParkingCommentsUseCase: ListParkingCommentsUseCase,
   ) {}
 
   @Post('new')
@@ -82,8 +89,14 @@ export class ParkingController {
   @ApiParam({ name: 'id', description: 'Parking UUID' })
   @ApiResponse({ status: 200, type: GetParkingDetailsOutputDTO })
   @ApiResponse({ status: 404, description: 'Parking not found' })
-  async getParkingDetails(@Param('id') id: string) {
-    const response = await this.getParkingDetailsUseCase.execute({ id });
+  async getParkingDetails(
+    @Param('id') id: string,
+    @GetUser() user: DecodedToken,
+  ) {
+    const response = await this.getParkingDetailsUseCase.execute({
+      id,
+      userId: user.userId,
+    });
 
     return new GetParkingDetailsOutputDTO(response);
   }
@@ -98,6 +111,10 @@ export class ParkingController {
         longitude: query.lng,
       },
       radius: query.radius ?? 500,
+      minSpots: query.minSpots,
+      availableOnly: query.availableOnly,
+      verifiedOnly: query.verifiedOnly,
+      sort: query.sort,
     });
 
     return new FindNearbyParkingsOutputDto(response);
@@ -167,5 +184,27 @@ export class ParkingController {
       parkingId: id,
       content: body.content,
     });
+  }
+
+  @Get(':id/comments')
+  @ApiOperation({
+    summary: 'List comments of a parking with cursor pagination',
+  })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 200, type: ListParkingCommentsOutputDTO })
+  @ApiResponse({ status: 404, description: 'Parking not found' })
+  async listComments(
+    @Param('id') id: string,
+    @Query() query: ListParkingCommentsQueryDto,
+  ) {
+    const cursor = query.cursor ? decodeCommentCursor(query.cursor) : null;
+
+    const response = await this.listParkingCommentsUseCase.execute({
+      parkingId: id,
+      cursor,
+      limit: query.limit,
+    });
+
+    return new ListParkingCommentsOutputDTO(response);
   }
 }

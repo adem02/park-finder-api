@@ -14,6 +14,7 @@ import { CoordinatesVO } from '../../domain/value-objects/Coordinates.vo';
 import { UuidGenerator } from '../../common/utils/UuidGenerator';
 import { ResourceNotFoundException } from '../../domain/exceptions/ResourceNotFound.exception';
 import { ParkingPhoto } from '../types/parking.types';
+import { AwardPointsUseCase } from '../points/AwardPoints.use-case';
 
 export interface AddNewParkingUseCaseRequest {
   userId: string;
@@ -39,6 +40,7 @@ export class AddNewParkingUseCase {
     private readonly storageService: StorageService,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
+    private readonly awardPointsUseCase: AwardPointsUseCase,
   ) {}
 
   async execute(
@@ -80,6 +82,11 @@ export class AddNewParkingUseCase {
       });
 
       await this.parkingRepository.create(newParking);
+
+      await this.awardPointsUseCase.execute({
+        userId: user.id,
+        action: 'PARKING_ADDED',
+      });
 
       return { id: newParking.id };
     } catch (error) {

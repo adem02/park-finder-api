@@ -1,4 +1,5 @@
 import { VoteUseCase } from '../../../../src/application/vote/Vote.use-case';
+import { AwardPointsUseCase } from '../../../../src/application/points/AwardPoints.use-case';
 import { ResourceNotFoundException } from '../../../../src/domain/exceptions/ResourceNotFound.exception';
 import { AlreadyVotedException } from '../../../../src/domain/exceptions/AlreadyVoted.exception';
 import { User } from '../../../../src/domain/entities/User';
@@ -7,7 +8,6 @@ import { Vote } from '../../../../src/domain/entities/Vote';
 import { VoteType } from '../../../../src/domain/types/vote.types';
 import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBalance.vo';
 import { CoordinatesVO } from '../../../../src/domain/value-objects/Coordinates.vo';
-import { POINTS_PER_ACTION } from '../../../../src/domain/constants/points.contants';
 import type { VoteRepository } from '../../../../src/application/gateway';
 import type { UserRepository } from '../../../../src/application/gateway';
 import type { ParkingRepository } from '../../../../src/application/gateway';
@@ -70,9 +70,9 @@ const makeParkingRepository = (
   overrides: Partial<jest.Mocked<ParkingRepository>> = {},
 ): jest.Mocked<ParkingRepository> => ({
   findNearBy: jest.fn(),
+  findNearByWithDetails: jest.fn(),
   findById: jest.fn().mockResolvedValue(makeParking()),
   create: jest.fn(),
-  updateById: jest.fn(),
   findByUserId: jest.fn(),
   deleteById: jest.fn(),
   ...overrides,
@@ -88,12 +88,22 @@ const makeUseCase = (
   const voteRepository = makeVoteRepository(overrides.vote);
   const userRepository = makeUserRepository(overrides.user);
   const parkingRepository = makeParkingRepository(overrides.parking);
+  const awardPointsUseCase = {
+    execute: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<AwardPointsUseCase>;
   const useCase = new VoteUseCase(
     voteRepository,
     userRepository,
     parkingRepository,
+    awardPointsUseCase,
   );
-  return { useCase, voteRepository, userRepository, parkingRepository };
+  return {
+    useCase,
+    voteRepository,
+    userRepository,
+    parkingRepository,
+    awardPointsUseCase,
+  };
 };
 
 const validRequest = {
@@ -115,14 +125,14 @@ describe('VoteUseCase', () => {
     });
 
     it('should award VOTE_CAST points to the user', async () => {
-      const { useCase, userRepository } = makeUseCase();
+      const { useCase, awardPointsUseCase } = makeUseCase();
 
       await useCase.execute(validRequest);
 
-      expect(userRepository.updatePointsById).toHaveBeenCalledWith(
-        validRequest.userId,
-        POINTS_PER_ACTION.VOTE_CAST,
-      );
+      expect(awardPointsUseCase.execute).toHaveBeenCalledWith({
+        userId: validRequest.userId,
+        action: 'VOTE_CAST',
+      });
     });
 
     it('should not call voteRepository.update on a new vote', async () => {
@@ -178,7 +188,7 @@ describe('VoteUseCase', () => {
     });
 
     it('should not award points when changing vote type', async () => {
-      const { useCase, userRepository } = makeUseCase({
+      const { useCase, awardPointsUseCase } = makeUseCase({
         vote: {
           findByParkingIdAndUserId: jest
             .fn()
@@ -188,7 +198,7 @@ describe('VoteUseCase', () => {
 
       await useCase.execute({ ...validRequest, type: VoteType.DOWNVOTE });
 
-      expect(userRepository.updatePointsById).not.toHaveBeenCalled();
+      expect(awardPointsUseCase.execute).not.toHaveBeenCalled();
     });
   });
 

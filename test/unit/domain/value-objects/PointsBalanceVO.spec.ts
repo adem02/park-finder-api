@@ -1,4 +1,4 @@
-import { POINTS_PER_ACTION } from '../../../../src/domain/constants/points.contants';
+import { POINTS_PER_ACTION } from '../../../../src/domain/constants/points.constants';
 import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBalance.vo';
 import { InvalidPointsBalanceException } from '../../../../src/domain/exceptions/InvalidPointsBalance.exception';
 

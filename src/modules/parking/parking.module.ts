@@ -22,13 +22,16 @@ import { PrismaVoteRepository } from '../../infrastructure/orm/repositories/Pris
 import { VoteUseCase } from '../../application/vote/Vote.use-case';
 import { CancelVoteUseCase } from '../../application/vote/CancelVote.use-case';
 import { CommentParkingUseCase } from '../../application/comment/CommentParking.use-case';
+import { ListParkingCommentsUseCase } from '../../application/comment/ListParkingComments.use-case';
 import { PrismaCommentRepository } from '../../infrastructure/orm/repositories/PrismaComment.repository';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     MulterModule.register({
       storage: memoryStorage(),
     }),
+    UserModule,
   ],
   controllers: [ParkingController],
   providers: [
@@ -63,6 +66,7 @@ import { PrismaCommentRepository } from '../../infrastructure/orm/repositories/P
     VoteUseCase,
     CancelVoteUseCase,
     CommentParkingUseCase,
+    ListParkingCommentsUseCase,
   ],
 })
 export class ParkingModule {}

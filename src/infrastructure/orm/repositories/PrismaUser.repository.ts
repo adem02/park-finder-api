@@ -66,8 +66,16 @@ export class PrismaUserRepository implements UserRepository {
     });
   }
 
-  findStatsByUserId(_userId: string): Promise<UserStats> {
-    throw new Error('Method not implemented.');
+  findStatsByUserId(userId: string): Promise<UserStats> {
+    return this.prismaService.$transaction(async (tx) => {
+      const [parkingsAdded, reportsCount, votesCount] = await Promise.all([
+        tx.parking.count({ where: { addedById: userId } }),
+        tx.availabilityReport.count({ where: { reportedById: userId } }),
+        tx.vote.count({ where: { votedById: userId } }),
+      ]);
+
+      return { parkingsAdded, reportsCount, votesCount };
+    });
   }
 
   async updatePointsById(id: string, points: number): Promise<void> {
