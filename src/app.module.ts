@@ -14,6 +14,7 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './infrastructure/orm/prisma/prisma.module';
 import { ParkingModule } from './modules/parking/parking.module';
+import { UserModule } from './modules/user/user.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
@@ -21,6 +22,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     PrismaModule,
     ParkingModule,
     AuthModule,
+    UserModule,
     CommonModule,
     ConfigModule.forRoot({
       isGlobal: true,

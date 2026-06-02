@@ -12,7 +12,7 @@ import type {
 import { ResourceNotFoundException } from '../../domain/exceptions/ResourceNotFound.exception';
 import { AvailabilityReport } from '../../domain/entities/AvailabilityReport';
 import { UuidGenerator } from '../../common/utils/UuidGenerator';
-import { POINTS_PER_ACTION } from '../../domain/constants/points.contants';
+import { AwardPointsUseCase } from '../points/AwardPoints.use-case';
 
 export interface ReportAvailabilityRequest {
   parkingId: string;
@@ -28,6 +28,7 @@ export class ReportAvailabilityUseCase {
     @Inject(PARKING_REPOSITORY)
     private readonly parkingRepository: ParkingRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    private readonly awardPointsUseCase: AwardPointsUseCase,
   ) {}
 
   async execute(request: ReportAvailabilityRequest) {
@@ -58,9 +59,9 @@ export class ReportAvailabilityUseCase {
 
     await this.availabilityRepository.create(report);
 
-    await this.userRepository.updatePointsById(
-      request.reporterId,
-      POINTS_PER_ACTION.AVAILABILITY_REPORTED,
-    );
+    await this.awardPointsUseCase.execute({
+      userId: request.reporterId,
+      action: 'AVAILABILITY_REPORTED',
+    });
   }
 }

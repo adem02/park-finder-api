@@ -1,4 +1,4 @@
-import { POINTS_PER_ACTION } from '../constants/points.contants';
+import { POINTS_PER_ACTION } from '../constants/points.constants';
 import { InvalidPointsBalanceException } from '../exceptions/InvalidPointsBalance.exception';
 import { PointsAction } from '../types/points.types';
 

@@ -1,11 +1,11 @@
 import { ReportAvailabilityUseCase } from '../../../../src/application/report/ReportAvailability.use-case';
+import { AwardPointsUseCase } from '../../../../src/application/points/AwardPoints.use-case';
 import { ResourceNotFoundException } from '../../../../src/domain/exceptions/ResourceNotFound.exception';
 import { InvalidAvailabilityReportException } from '../../../../src/domain/exceptions/InvalidAvailabilityReport.exception';
 import { User } from '../../../../src/domain/entities/User';
 import { Parking } from '../../../../src/domain/entities/Parking';
 import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBalance.vo';
 import { CoordinatesVO } from '../../../../src/domain/value-objects/Coordinates.vo';
-import { POINTS_PER_ACTION } from '../../../../src/domain/constants/points.contants';
 import { AvailabilityReport } from '../../../../src/domain/entities/AvailabilityReport';
 import type { AvailabilityRepository } from '../../../../src/application/gateway/Availability.repository';
 import type { ParkingRepository } from '../../../../src/application/gateway/Parking.repository';
@@ -37,9 +37,9 @@ const makeParkingRepository = (
   overrides: Partial<jest.Mocked<ParkingRepository>> = {},
 ): jest.Mocked<ParkingRepository> => ({
   findNearBy: jest.fn(),
+  findNearByWithDetails: jest.fn(),
   findById: jest.fn().mockResolvedValue(makeParking()),
   create: jest.fn(),
-  updateById: jest.fn(),
   findByUserId: jest.fn(),
   deleteById: jest.fn(),
   ...overrides,
@@ -81,12 +81,22 @@ const makeUseCase = (
   const availabilityRepository = makeAvailabilityRepository(
     overrides.availability,
   );
+  const awardPointsUseCase = {
+    execute: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<AwardPointsUseCase>;
   const useCase = new ReportAvailabilityUseCase(
     availabilityRepository,
     parkingRepository,
     userRepository,
+    awardPointsUseCase,
   );
-  return { useCase, parkingRepository, userRepository, availabilityRepository };
+  return {
+    useCase,
+    parkingRepository,
+    userRepository,
+    availabilityRepository,
+    awardPointsUseCase,
+  };
 };
 
 const validRequest = {
@@ -120,14 +130,14 @@ describe('ReportAvailabilityUseCase', () => {
     });
 
     it('should award AVAILABILITY_REPORTED points to the reporter', async () => {
-      const { useCase, userRepository } = makeUseCase();
+      const { useCase, awardPointsUseCase } = makeUseCase();
 
       await useCase.execute(validRequest);
 
-      expect(userRepository.updatePointsById).toHaveBeenCalledWith(
-        validRequest.reporterId,
-        POINTS_PER_ACTION.AVAILABILITY_REPORTED,
-      );
+      expect(awardPointsUseCase.execute).toHaveBeenCalledWith({
+        userId: validRequest.reporterId,
+        action: 'AVAILABILITY_REPORTED',
+      });
     });
 
     it('should fetch parking and user in parallel', async () => {
@@ -215,14 +225,14 @@ describe('ReportAvailabilityUseCase', () => {
     });
 
     it('should not update points when create throws', async () => {
-      const { useCase, userRepository } = makeUseCase({
+      const { useCase, awardPointsUseCase } = makeUseCase({
         availability: {
           create: jest.fn().mockRejectedValue(new Error('DB error')),
         },
       });
 
       await expect(useCase.execute(validRequest)).rejects.toThrow('DB error');
-      expect(userRepository.updatePointsById).not.toHaveBeenCalled();
+      expect(awardPointsUseCase.execute).not.toHaveBeenCalled();
     });
   });
 });

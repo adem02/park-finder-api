@@ -2,19 +2,32 @@ import { AvailabilityRepository } from '../../../application/gateway';
 import { Injectable } from '@nestjs/common';
 import { AvailabilityReport } from '../../../domain/entities/AvailabilityReport';
 import { PrismaService } from '../prisma/Prisma.service';
+import { AvailabilityMapper } from '../mapper/Availability.mapper';
 
 @Injectable()
 export class PrismaAvailabilityRepository implements AvailabilityRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  findLatestByParkingId(
-    _parkingId: string,
+  async findLatestByParkingId(
+    parkingId: string,
   ): Promise<AvailabilityReport | null> {
-    throw new Error('Method not implemented.');
+    const report = await this.prismaService.availabilityReport.findFirst({
+      where: { parkingId, expired: false },
+      orderBy: { reportedAt: 'desc' },
+      include: { parking: true, reportedBy: true },
+    });
+
+    return report ? AvailabilityMapper.toDomain(report) : null;
   }
 
-  findByParkingId(_parkingId: string): Promise<AvailabilityReport[]> {
-    throw new Error('Method not implemented.');
+  async findByParkingId(parkingId: string): Promise<AvailabilityReport[]> {
+    const reports = await this.prismaService.availabilityReport.findMany({
+      where: { parkingId },
+      orderBy: { reportedAt: 'desc' },
+      include: { parking: true, reportedBy: true },
+    });
+
+    return reports.map((report) => AvailabilityMapper.toDomain(report));
   }
 
   async create(report: AvailabilityReport): Promise<void> {
@@ -30,7 +43,10 @@ export class PrismaAvailabilityRepository implements AvailabilityRepository {
     });
   }
 
-  expireOld(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async expireOld(): Promise<void> {
+    await this.prismaService.availabilityReport.updateMany({
+      where: { expired: false, expiresAt: { lte: new Date() } },
+      data: { expired: true },
+    });
   }
 }

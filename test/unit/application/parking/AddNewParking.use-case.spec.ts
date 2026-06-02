@@ -1,4 +1,5 @@
 import { AddNewParkingUseCase } from '../../../../src/application/parking/AddNewParking.use-case';
+import { AwardPointsUseCase } from '../../../../src/application/points/AwardPoints.use-case';
 import { ResourceNotFoundException } from '../../../../src/domain/exceptions/ResourceNotFound.exception';
 import { User } from '../../../../src/domain/entities/User';
 import { Parking } from '../../../../src/domain/entities/Parking';
@@ -32,9 +33,9 @@ const makeParkingRepository = (
   overrides: Partial<jest.Mocked<ParkingRepository>> = {},
 ): jest.Mocked<ParkingRepository> => ({
   findNearBy: jest.fn().mockResolvedValue([]),
+  findNearByWithDetails: jest.fn().mockResolvedValue([]),
   findById: jest.fn().mockResolvedValue(null),
   create: jest.fn().mockResolvedValue(undefined),
-  updateById: jest.fn(),
   findByUserId: jest.fn(),
   deleteById: jest.fn(),
   ...overrides,
@@ -57,6 +58,7 @@ const makeUserRepository = (
   create: jest.fn(),
   updateById: jest.fn(),
   deleteById: jest.fn(),
+  updatePointsById: jest.fn(),
   findStatsByUserId: jest.fn(),
   ...overrides,
 });
@@ -71,14 +73,24 @@ const makeUseCase = (
   const parkingRepository = makeParkingRepository(overrides.parkingRepository);
   const storageService = makeStorageService(overrides.storageService);
   const userRepository = makeUserRepository(overrides.userRepository);
+  const awardPointsUseCase = {
+    execute: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<AwardPointsUseCase>;
 
   const useCase = new AddNewParkingUseCase(
     parkingRepository,
     storageService,
     userRepository,
+    awardPointsUseCase,
   );
 
-  return { useCase, parkingRepository, storageService, userRepository };
+  return {
+    useCase,
+    parkingRepository,
+    storageService,
+    userRepository,
+    awardPointsUseCase,
+  };
 };
 
 const validRequest = {
@@ -203,6 +215,28 @@ describe('AddNewParkingUseCase', () => {
       await useCase.execute(validRequest);
 
       expect(storageService.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('should award PARKING_ADDED points to the user', async () => {
+      const { useCase, awardPointsUseCase } = makeUseCase();
+
+      await useCase.execute(validRequest);
+
+      expect(awardPointsUseCase.execute).toHaveBeenCalledWith({
+        userId: validRequest.userId,
+        action: 'PARKING_ADDED',
+      });
+    });
+
+    it('should not award points if parking creation fails', async () => {
+      const { useCase, awardPointsUseCase } = makeUseCase({
+        parkingRepository: {
+          create: jest.fn().mockRejectedValue(new Error('DB error')),
+        },
+      });
+
+      await expect(useCase.execute(validRequest)).rejects.toThrow('DB error');
+      expect(awardPointsUseCase.execute).not.toHaveBeenCalled();
     });
   });
 });

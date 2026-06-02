@@ -27,3 +27,9 @@ export interface UserRankInfo {
   percentile: string;
   monthlyPoints: number;
 }
+
+export function getCurrentYearMonth(date: Date = new Date()): YearMonth {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0') as Month;
+  return `${year}-${month}`;
+}
