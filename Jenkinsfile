@@ -44,6 +44,7 @@ pipeline {
     post {
         always {
             echo 'Pipeline terminé'
+            cleanWs()
         }
         failure {
             echo '❌ Pipeline en échec'
