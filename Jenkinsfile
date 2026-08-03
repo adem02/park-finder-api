@@ -34,8 +34,11 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no root@51.15.141.96 "\
                           cd /root/park-finder-api && \
                           git pull origin develop && \
+                          docker tag park-finder-api-api:latest park-finder-api-api:previous || true && \
                           docker compose up -d --build && \
-                          docker compose exec -T api npx prisma migrate deploy"
+                          docker compose exec -T api npx prisma migrate deploy && \
+                          docker image prune -f && \
+                          docker builder prune -af"
                     '''
                 }
             }
