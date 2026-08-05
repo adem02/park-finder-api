@@ -44,6 +44,11 @@ export class CommentBuilder {
     return this;
   }
 
+  createdAt(createdAt: Date): this {
+    this.row.createdAt = createdAt;
+    return this;
+  }
+
   build(): CommentRow {
     return { ...this.row };
   }
