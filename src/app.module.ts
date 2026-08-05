@@ -12,14 +12,14 @@ import appleConfig from './config/apple.config';
 import cloudinaryConfig from './config/cloudinary.config';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { PrismaModule } from './infrastructure/orm/prisma/prisma.module';
+import { DrizzleModule } from './infrastructure/orm/drizzle/drizzle.module';
 import { ParkingModule } from './modules/parking/parking.module';
 import { UserModule } from './modules/user/user.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
-    PrismaModule,
+    DrizzleModule,
     ParkingModule,
     AuthModule,
     UserModule,

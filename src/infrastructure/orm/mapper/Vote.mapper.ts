@@ -1,8 +1,3 @@
-import {
-  Vote as ModelVote,
-  User as ModelUser,
-  Parking as ModelParking,
-} from '../prisma/generated/client';
 import { UserMapper } from './User.mapper';
 import { User } from '../../../domain/entities/User';
 import { PointsBalanceVO } from '../../../domain/value-objects/PointsBalance.vo';
@@ -11,13 +6,41 @@ import { Parking } from '../../../domain/entities/Parking';
 import { Vote } from '../../../domain/entities/Vote';
 import { VoteType } from '../../../domain/types/vote.types';
 
-type VoteWithOptionalUserAndParking = ModelVote & {
-  votedBy?: ModelUser | null;
-  parking?: ModelParking | null;
-};
+interface UserModel {
+  id: string;
+  username: string;
+  email: string | null;
+  points: number;
+  createdAt: Date;
+  updatedAt: Date | null;
+}
+
+interface ParkingModel {
+  id: string;
+  name: string;
+  totalSpots: number;
+  photos: string[] | null;
+  latitude: number;
+  longitude: number;
+  addedById: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  addedBy?: UserModel | null;
+}
+
+interface VoteModel {
+  id: string;
+  parkingId: string;
+  votedById: string;
+  voteType: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  votedBy?: UserModel | null;
+  parking?: ParkingModel | null;
+}
 
 export class VoteMapper {
-  static toDomain(model: VoteWithOptionalUserAndParking) {
+  static toDomain(model: VoteModel) {
     const votedBy = model.votedBy
       ? UserMapper.toDomain(model.votedBy)
       : User.reconstitute({

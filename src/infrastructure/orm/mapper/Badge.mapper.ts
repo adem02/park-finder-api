@@ -1,9 +1,17 @@
 import { Badge as DomainBadge } from '../../../domain/entities/Badge';
 import { BadgeName, BadgeType } from '../../../domain/types/badge.types';
-import { Badge as ModelBadge } from '../prisma/generated/client';
+
+interface BadgeModel {
+  id: string;
+  name: string;
+  description: string;
+  iconUrl: string;
+  criteriaType: string;
+  criteriaThreshold: number;
+}
 
 export class BadgeMapper {
-  static toDomain(model: ModelBadge): DomainBadge {
+  static toDomain(model: BadgeModel): DomainBadge {
     return DomainBadge.create({
       id: model.id,
       name: model.name as BadgeName,
