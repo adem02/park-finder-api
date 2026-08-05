@@ -16,8 +16,8 @@ import { AuthGuard } from './guards/JwtAuth.guard';
 import { GoogleStrategy } from './strategies/Google.strategy';
 import { AppleStrategy } from './strategies/Apple.strategy';
 import { OAuthUseCase } from '../../application/auth/OAuth.use-case';
-import { PrismaUserRepository } from '../../infrastructure/orm/repositories/PrismaUser.repository';
-import { PrismaCredentialsRepository } from '../../infrastructure/orm/repositories/PrismaCredentials.repository';
+import { DrizzleUserRepository } from '../../infrastructure/orm/repositories/DrizzleUser.repository';
+import { DrizzleCredentialsRepository } from '../../infrastructure/orm/repositories/DrizzleCredentials.repository';
 import { RefreshTokenUseCase } from '../../application/auth/RefreshToken.use-case';
 
 @Module({
@@ -50,11 +50,11 @@ import { RefreshTokenUseCase } from '../../application/auth/RefreshToken.use-cas
     },
     {
       provide: USER_REPOSITORY,
-      useClass: PrismaUserRepository,
+      useClass: DrizzleUserRepository,
     },
     {
       provide: CREDENTIALS_REPOSITORY,
-      useClass: PrismaCredentialsRepository,
+      useClass: DrizzleCredentialsRepository,
     },
   ],
   exports: [AuthGuard, TOKEN_SERVICE],

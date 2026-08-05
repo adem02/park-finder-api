@@ -6,10 +6,10 @@ import {
   PARKING_REPOSITORY,
   USER_REPOSITORY,
 } from '../../common/constants/injection-tokens.constants';
-import { PrismaUserRepository } from '../../infrastructure/orm/repositories/PrismaUser.repository';
-import { PrismaBadgeRepository } from '../../infrastructure/orm/repositories/PrismaBadge.repository';
-import { PrismaLeaderboardRepository } from '../../infrastructure/orm/repositories/PrismaLeaderboard.repository';
-import { PrismaParkingRepository } from '../../infrastructure/orm/repositories/PrismaParking.repository';
+import { DrizzleUserRepository } from '../../infrastructure/orm/repositories/DrizzleUser.repository';
+import { DrizzleBadgeRepository } from '../../infrastructure/orm/repositories/DrizzleBadge.repository';
+import { DrizzleLeaderboardRepository } from '../../infrastructure/orm/repositories/DrizzleLeaderboard.repository';
+import { DrizzleParkingRepository } from '../../infrastructure/orm/repositories/DrizzleParking.repository';
 import { GetUserProfileUseCase } from '../../application/user/GetUserProfile.use-case';
 import { GetLeaderboardUseCase } from '../../application/leaderboard/GetLeaderboard.use-case';
 import { AwardPointsUseCase } from '../../application/points/AwardPoints.use-case';
@@ -18,10 +18,10 @@ import { CheckBadgesUseCase } from '../../application/badge/CheckBadges.use-case
 @Module({
   controllers: [UserController],
   providers: [
-    { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
-    { provide: BADGE_REPOSITORY, useClass: PrismaBadgeRepository },
-    { provide: LEADERBOARD_REPOSITORY, useClass: PrismaLeaderboardRepository },
-    { provide: PARKING_REPOSITORY, useClass: PrismaParkingRepository },
+    { provide: USER_REPOSITORY, useClass: DrizzleUserRepository },
+    { provide: BADGE_REPOSITORY, useClass: DrizzleBadgeRepository },
+    { provide: LEADERBOARD_REPOSITORY, useClass: DrizzleLeaderboardRepository },
+    { provide: PARKING_REPOSITORY, useClass: DrizzleParkingRepository },
     GetUserProfileUseCase,
     GetLeaderboardUseCase,
     CheckBadgesUseCase,
