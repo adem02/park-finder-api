@@ -10,7 +10,7 @@ export class DrizzleService implements OnModuleDestroy {
 
   constructor() {
     this.pool = new Pool({
-      connectionString: process.env.DRIZZLE_DATABASE_URL,
+      connectionString: process.env.DATABASE_URL,
     });
     this.db = drizzle(this.pool, { schema });
   }
