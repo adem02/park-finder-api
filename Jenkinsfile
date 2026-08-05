@@ -24,6 +24,11 @@ pipeline {
                 sh 'yarn test:unit'
             }
         }
+        stage('Test integration') {
+            steps {
+                sh 'yarn test:integration'
+            }
+        }
         stage('Deploy') {
             when {
                 branch 'develop'
@@ -37,7 +42,7 @@ pipeline {
                           chown -R 1000:1000 . && \
                           docker tag park-finder-api-api:latest park-finder-api-api:previous || true && \
                           docker compose up -d --build --force-recreate -V api && \
-                          docker compose exec -T api npx prisma migrate deploy && \
+                          docker compose exec -T api yarn migrate:deploy && \
                           docker image prune -f && \
                           docker builder prune -af"
                     '''

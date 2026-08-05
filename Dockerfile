@@ -1,5 +1,5 @@
 # Stage 1: Install all dependencies
-FROM node:22.15.0-alpine AS deps
+FROM node:22.23.2-alpine AS deps
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 # Stage 2: Development (hot-reload)
-FROM node:22.15.0-alpine AS development
+FROM node:22.23.2-alpine AS development
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ EXPOSE 3000
 CMD ["yarn", "start:dev"]
 
 # Stage 3: Build
-FROM node:22.15.0-alpine AS build
+FROM node:22.23.2-alpine AS build
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN yarn build
 RUN yarn install --production --frozen-lockfile
 
 # Stage 4: Production
-FROM node:22.15.0-alpine AS production
+FROM node:22.23.2-alpine AS production
 
 WORKDIR /app
 
