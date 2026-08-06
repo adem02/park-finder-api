@@ -41,6 +41,7 @@ pipeline {
                 branch 'develop'
             }
             steps {
+                sh 'docker system prune -af --volumes || true'
                 withCredentials([usernamePassword(credentialsId: 'scw-api-key', usernameVariable: 'SCW_ACCESS_KEY', passwordVariable: 'SCW_SECRET_KEY')]) {
                     sh '''
                         echo "$SCW_SECRET_KEY" | docker login rg.fr-par.scw.cloud -u "$SCW_ACCESS_KEY" --password-stdin
