@@ -10,6 +10,7 @@ pipeline {
         REGISTRY_IMAGE = 'rg.fr-par.scw.cloud/park-finder-staging/api'
         SCW_CONTAINER_ID = '633811ba-701a-484f-8979-54e3b968e893'
         SCW_DEFAULT_REGION = 'fr-par'
+        SCW_DEFAULT_ORGANIZATION_ID = '4494ff6b-d52d-433e-844f-44273d417f18'
     }
 
     stages {
