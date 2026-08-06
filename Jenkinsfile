@@ -78,6 +78,8 @@ pipeline {
     post {
         always {
             echo 'Pipeline terminé'
+            sh 'docker image prune -af || true'
+            sh 'docker builder prune -af --filter "until=1h" || true'
             cleanWs()
         }
         failure {
