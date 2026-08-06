@@ -6,6 +6,12 @@ pipeline {
         nodejs 'node22'
     }
 
+    environment {
+        REGISTRY_IMAGE = 'rg.fr-par.scw.cloud/park-finder-staging/api'
+        SCW_CONTAINER_ID = '633811ba-701a-484f-8979-54e3b968e893'
+        SCW_DEFAULT_REGION = 'fr-par'
+    }
+
     stages {
         stage('Install') {
             steps {
@@ -29,22 +35,40 @@ pipeline {
                 sh 'yarn test:integration'
             }
         }
-        stage('Deploy') {
+        stage('Build & Push Image') {
             when {
                 branch 'develop'
             }
             steps {
-                sshagent(credentials: ['scaleway-ssh-key']) {
+                withCredentials([usernamePassword(credentialsId: 'scw-api-key', usernameVariable: 'SCW_ACCESS_KEY', passwordVariable: 'SCW_SECRET_KEY')]) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no root@51.15.141.96 "\
-                          cd /root/park-finder-api && \
-                          git pull origin develop && \
-                          chown -R 1000:1000 . && \
-                          docker tag park-finder-api-api:latest park-finder-api-api:previous || true && \
-                          docker compose up -d --build --force-recreate -V api && \
-                          docker compose exec -T api yarn migrate:deploy && \
-                          docker image prune -f && \
-                          docker builder prune -af"
+                        echo "$SCW_SECRET_KEY" | docker login rg.fr-par.scw.cloud -u "$SCW_ACCESS_KEY" --password-stdin
+                        docker build --target production -t ${REGISTRY_IMAGE}:${GIT_COMMIT} -t ${REGISTRY_IMAGE}:latest .
+                        docker push ${REGISTRY_IMAGE}:${GIT_COMMIT}
+                        docker push ${REGISTRY_IMAGE}:latest
+                    '''
+                }
+            }
+        }
+        stage('Run Migrations') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                withCredentials([string(credentialsId: 'staging-database-url', variable: 'DATABASE_URL')]) {
+                    sh 'yarn migrate:deploy'
+                }
+            }
+        }
+        stage('Deploy to Serverless Container') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'scw-api-key', usernameVariable: 'SCW_ACCESS_KEY', passwordVariable: 'SCW_SECRET_KEY')]) {
+                    sh '''
+                        scw container container update ${SCW_CONTAINER_ID} image=${REGISTRY_IMAGE}:${GIT_COMMIT} --wait
+                        scw container container redeploy ${SCW_CONTAINER_ID} --wait
                     '''
                 }
             }
