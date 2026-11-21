@@ -1,5 +1,6 @@
 import { AddNewParkingUseCase } from '../../../../src/application/parking/AddNewParking.use-case';
 import { AwardPointsUseCase } from '../../../../src/application/points/AwardPoints.use-case';
+import { ParkingAlreadyExistsException } from '../../../../src/domain/exceptions/ParkingAlreadyExists.exception';
 import { ResourceNotFoundException } from '../../../../src/domain/exceptions/ResourceNotFound.exception';
 import { User } from '../../../../src/domain/entities/User';
 import { Parking } from '../../../../src/domain/entities/Parking';
@@ -160,15 +161,22 @@ describe('AddNewParkingUseCase', () => {
       );
     });
 
-    it('should throw ResourceNotFoundException when a parking already exists nearby', async () => {
-      const { useCase } = makeUseCase({
+    it('should throw ParkingAlreadyExistsException (409) when a parking already exists within 50 m', async () => {
+      const { useCase, parkingRepository } = makeUseCase({
         parkingRepository: {
           findNearBy: jest.fn().mockResolvedValue([makeParking()]),
         },
       });
 
-      await expect(useCase.execute(validRequest)).rejects.toThrow(
-        ResourceNotFoundException,
+      const error = await useCase
+        .execute(validRequest)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ParkingAlreadyExistsException);
+      expect((error as ParkingAlreadyExistsException).statusCode).toBe(409);
+      expect(parkingRepository.findNearBy).toHaveBeenCalledWith(
+        expect.anything(),
+        { radius: 50, limit: 1 },
       );
     });
 

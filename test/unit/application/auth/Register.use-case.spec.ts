@@ -1,4 +1,5 @@
 import { RegisterUseCase } from '../../../../src/application/auth/Register.use-case';
+import { UsernameAlreadyTakenException } from '../../../../src/domain/exceptions/UsernameAlreadyTaken.exception';
 import { EmailAlreadyInUseException } from '../../../../src/domain/exceptions/EmailAlreadyInUse.exception';
 import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBalance.vo';
 import { User } from '../../../../src/domain/entities/User';
@@ -102,6 +103,19 @@ describe('RegisterUseCase', () => {
       const createdCredentials = credentialsRepository.create.mock.calls[0][0];
       expect(createdCredentials.provider).toBe('local');
       expect(createdCredentials.passwordHash).toBe('hashed-password');
+    });
+
+    it('should throw UsernameAlreadyTakenException if the username is taken', async () => {
+      const { useCase, userRepository, credentialsRepository } = makeUseCase({
+        findByUsername: jest.fn().mockResolvedValue(makeUser()),
+      });
+
+      await expect(useCase.execute(validRequest)).rejects.toThrow(
+        UsernameAlreadyTakenException,
+      );
+      expect(userRepository.findByUsername).toHaveBeenCalledWith('johndoe');
+      expect(userRepository.create).not.toHaveBeenCalled();
+      expect(credentialsRepository.create).not.toHaveBeenCalled();
     });
 
     it('should throw EmailAlreadyInUseException if email is taken', async () => {

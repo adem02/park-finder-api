@@ -7,6 +7,8 @@ export const PARKING_TOTAL_SPOTS_MAX = 1000;
 export const PARKING_MAX_PHOTOS = 3;
 export const MODERATION_THRESHOLD = -5;
 export const VERIFIED_THRESHOLD = 10;
+/** A new parking is refused within this distance of an existing one. */
+export const DUPLICATE_PARKING_RADIUS_METERS = 50;
 export const PARKING_RADIUS_VALUES: ParkingRadius[] = [
   500, 1000, 2000, 5000, 10000,
 ];

@@ -12,6 +12,8 @@ import type {
 import { Parking } from '../../domain/entities/Parking';
 import { CoordinatesVO } from '../../domain/value-objects/Coordinates.vo';
 import { UuidGenerator } from '../../common/utils/UuidGenerator';
+import { DUPLICATE_PARKING_RADIUS_METERS } from '../../domain/constants/parking.constants';
+import { ParkingAlreadyExistsException } from '../../domain/exceptions/ParkingAlreadyExists.exception';
 import { ResourceNotFoundException } from '../../domain/exceptions/ResourceNotFound.exception';
 import { ParkingPhoto } from '../types/parking.types';
 import { AwardPointsUseCase } from '../points/AwardPoints.use-case';
@@ -52,7 +54,10 @@ export class AddNewParkingUseCase {
     );
 
     const [nearByParkings, user] = await Promise.all([
-      this.parkingRepository.findNearBy(coordinates, { radius: 50, limit: 1 }),
+      this.parkingRepository.findNearBy(coordinates, {
+        radius: DUPLICATE_PARKING_RADIUS_METERS,
+        limit: 1,
+      }),
       this.userRepository.findById(request.userId),
     ]);
 
@@ -63,9 +68,7 @@ export class AddNewParkingUseCase {
     }
 
     if (nearByParkings.length > 0) {
-      throw new ResourceNotFoundException(
-        'A parking already exists near the provided coordinates.',
-      );
+      throw new ParkingAlreadyExistsException();
     }
 
     const photoUrls = await this.storageService.uploadMany(request.photos);
