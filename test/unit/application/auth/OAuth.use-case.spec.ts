@@ -174,6 +174,33 @@ describe('OAuthUseCase', () => {
     });
   });
 
+  describe('unique username', () => {
+    it('should append a suffix when the name-based username is taken', async () => {
+      const findByUsername = jest
+        .fn()
+        .mockImplementation((username: string) =>
+          Promise.resolve(username === 'johndoe' ? makeUser() : null),
+        );
+      const { useCase, userRepository } = makeUseCase({
+        userRepository: { findByUsername },
+      });
+
+      await useCase.execute(googleRequest);
+
+      const createdUser: User = userRepository.create.mock.calls[0][0];
+      expect(createdUser.username).toMatch(/^johndoe[0-9a-f]{6}$/);
+    });
+
+    it('should keep the name-based username when it is free', async () => {
+      const { useCase, userRepository } = makeUseCase();
+
+      await useCase.execute(googleRequest);
+
+      const createdUser: User = userRepository.create.mock.calls[0][0];
+      expect(createdUser.username).toBe('johndoe');
+    });
+  });
+
   describe('buildUsername', () => {
     it('should build username from firstName + lastName', async () => {
       const { useCase, userRepository } = makeUseCase();

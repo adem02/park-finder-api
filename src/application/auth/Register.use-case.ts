@@ -13,6 +13,7 @@ import { UserCredentials } from '../../domain/entities/UserCredentials';
 import type { IssuedRefreshToken, AccessToken } from '../types/auth.types';
 import { SessionIssuer } from './SessionIssuer';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/EmailAlreadyInUse.exception';
+import { UsernameAlreadyTakenException } from '../../domain/exceptions/UsernameAlreadyTaken.exception';
 import type { PasswordService } from '../gateway/Password.service';
 
 export interface RegisterRequest {
@@ -44,6 +45,14 @@ export class RegisterUseCase {
 
     if (user) {
       throw new EmailAlreadyInUseException();
+    }
+
+    // Checked up front: otherwise the unique constraint fails as a 500.
+    const sameUsername = await this.userRepository.findByUsername(
+      request.username,
+    );
+    if (sameUsername) {
+      throw new UsernameAlreadyTakenException();
     }
 
     const passwordHash = await this.passwordService.hash(request.password);

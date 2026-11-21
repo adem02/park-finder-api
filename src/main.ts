@@ -52,4 +52,11 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
   logger.log(`Server running in ${config.nodeEnv} mode on port ${config.port}`);
 }
-bootstrap();
+bootstrap().catch((error: unknown) => {
+  // A failed startup (bad config, port in use...) must stop the process with a clear log.
+  new Logger('Bootstrap').error(
+    'Server failed to start',
+    error instanceof Error ? error.stack : String(error),
+  );
+  process.exit(1);
+});
