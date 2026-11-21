@@ -61,30 +61,31 @@ export class DrizzleUserRepository implements UserRepository {
   }
 
   async findStatsByUserId(userId: string): Promise<UserStats> {
-    return this.drizzleService.db.transaction(async (tx) => {
-      const [[parkingsAdded], [reportsCount], [votesCount]] = await Promise.all(
-        [
-          tx
-            .select({ value: count() })
-            .from(parkings)
-            .where(eq(parkings.addedById, userId)),
-          tx
-            .select({ value: count() })
-            .from(availabilityReports)
-            .where(eq(availabilityReports.reportedById, userId)),
-          tx
-            .select({ value: count() })
-            .from(votes)
-            .where(eq(votes.votedById, userId)),
-        ],
-      );
+    // Three independent counts, run in parallel on the pool (one connection each).
+    // They used to share a transaction's single connection, which pg only
+    // serialises with a deprecation warning (an error from pg@9); the
+    // transaction brought no consistency anyway under READ COMMITTED.
+    const { db } = this.drizzleService;
+    const [[parkingsAdded], [reportsCount], [votesCount]] = await Promise.all([
+      db
+        .select({ value: count() })
+        .from(parkings)
+        .where(eq(parkings.addedById, userId)),
+      db
+        .select({ value: count() })
+        .from(availabilityReports)
+        .where(eq(availabilityReports.reportedById, userId)),
+      db
+        .select({ value: count() })
+        .from(votes)
+        .where(eq(votes.votedById, userId)),
+    ]);
 
-      return {
-        parkingsAdded: parkingsAdded.value,
-        reportsCount: reportsCount.value,
-        votesCount: votesCount.value,
-      };
-    });
+    return {
+      parkingsAdded: parkingsAdded.value,
+      reportsCount: reportsCount.value,
+      votesCount: votesCount.value,
+    };
   }
 
   async updatePointsById(id: string, points: number): Promise<void> {
