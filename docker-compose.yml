@@ -17,6 +17,26 @@ services:
       timeout: 5s
       retries: 5
 
+  # Base jetable des tests d'intégration : profil « test » (pas démarrée par un simple `docker compose up`),
+  # données en mémoire (tmpfs), port dédié. Identifiants factices, uniquement pour ce conteneur local.
+  postgres-test:
+    image: postgis/postgis:16-3.4
+    container_name: park-finder-postgres-test
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: parkfinder
+      POSTGRES_PASSWORD: parkfinder
+      POSTGRES_DB: parkfinder_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parkfinder -d parkfinder_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
   redis:
     image: redis:7.4.2-alpine
     container_name: park-finder-redis

@@ -6,5 +6,7 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "testTimeout": 120000
+  "globalSetup": "<rootDir>/test/integration/support/database/global-setup.ts",
+  "globalTeardown": "<rootDir>/test/integration/support/database/global-teardown.ts",
+  "testTimeout": 30000
 }
