@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+    # Sur un push, inutile de tout relancer pour de la doc. Pas de filtre sur les PR :
+    # un check obligatoire qui ne démarre jamais bloquerait le merge.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+# Un nouveau push sur une PR annule le run précédent, devenu inutile.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Format
+        run: npx prettier --check "src/**/*.ts" "test/**/*.ts"
+
+      # Sans --fix : la CI signale, elle ne modifie rien.
+      - name: Lint
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Unit tests
+        run: yarn test:unit
+
+      - name: Build
+        run: yarn build
+
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Même image que docker-compose.yml. Base jetable propre au job, identifiants factices.
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: parkfinder
+          POSTGRES_PASSWORD: parkfinder
+          POSTGRES_DB: parkfinder_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U parkfinder -d parkfinder_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      # Lu par le globalSetup Jest : pas de testcontainers en CI.
+      INTEGRATION_DATABASE_URL: postgresql://parkfinder:parkfinder@localhost:5432/parkfinder_test
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Integration tests
+        run: yarn test:integration
