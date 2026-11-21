@@ -14,6 +14,11 @@ import {
 
 export const providerEnum = pgEnum('Provider', ['local', 'google', 'apple']);
 export const voteType = pgEnum('VoteType', ['UPVOTE', 'DOWNVOTE']);
+export const refreshTokenRevocation = pgEnum('RefreshTokenRevocation', [
+  'rotated',
+  'logout',
+  'reuse',
+]);
 export const geoPoint = customType<{ data: string }>({
   dataType() {
     return 'geography(Point, 4326)';
@@ -216,5 +221,27 @@ export const monthlyLeaderboard = pgTable(
       table.month,
       table.monthlyPoints.desc(),
     ),
+  ],
+);
+
+export const refreshTokens = pgTable(
+  'refresh_tokens',
+  {
+    id: text('id').notNull().primaryKey(),
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    familyId: text('familyId').notNull(),
+    tokenHash: text('tokenHash').notNull().unique(),
+    expiresAt: timestamp('expiresAt', { withTimezone: true }).notNull(),
+    createdAt: timestamp('createdAt', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    revokedAt: timestamp('revokedAt', { withTimezone: true }),
+    revokedReason: refreshTokenRevocation('revokedReason'),
+  },
+  (table) => [
+    index('refresh_tokens_userId_idx').on(table.userId),
+    index('refresh_tokens_familyId_idx').on(table.familyId),
   ],
 );

@@ -4,7 +4,7 @@ import { UserCredentials } from '../../../../src/domain/entities/UserCredentials
 import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBalance.vo';
 import type { UserRepository } from '../../../../src/application/gateway/User.repository';
 import type { CredentialsRepository } from '../../../../src/application/gateway/Credentials.repository';
-import type { TokenService } from '../../../../src/application/gateway/Token.service';
+import { makeSessionIssuer } from './support/session-issuer.mock';
 import type { Logger } from '../../../../src/common/interfaces/Logger';
 
 const makeUser = (
@@ -57,11 +57,6 @@ const makeCredentialsRepository = (
   ...overrides,
 });
 
-const makeTokenService = (): jest.Mocked<TokenService> => ({
-  sign: jest.fn().mockResolvedValue('access-token'),
-  verify: jest.fn(),
-});
-
 const makeUseCase = (
   overrides: {
     userRepository?: Partial<jest.Mocked<UserRepository>>;
@@ -72,13 +67,13 @@ const makeUseCase = (
   const credentialsRepository = makeCredentialsRepository(
     overrides.credentialsRepository,
   );
-  const tokenService = makeTokenService();
+  const sessionIssuer = makeSessionIssuer();
   const logger = makeLogger();
 
   const useCase = new OAuthUseCase(
     userRepository,
     credentialsRepository,
-    tokenService,
+    sessionIssuer,
     logger,
   );
 
@@ -86,7 +81,7 @@ const makeUseCase = (
     useCase,
     userRepository,
     credentialsRepository,
-    tokenService,
+    sessionIssuer,
     logger,
   };
 };
@@ -147,14 +142,14 @@ describe('OAuthUseCase', () => {
 
   describe('execute — new user', () => {
     it('should create user and credentials on first OAuth login', async () => {
-      const { useCase, userRepository, credentialsRepository, tokenService } =
+      const { useCase, userRepository, credentialsRepository, sessionIssuer } =
         makeUseCase();
 
       const result = await useCase.execute(googleRequest);
 
       expect(userRepository.create).toHaveBeenCalledTimes(1);
       expect(credentialsRepository.create).toHaveBeenCalledTimes(1);
-      expect(tokenService.sign).toHaveBeenCalledWith(result.user.id);
+      expect(sessionIssuer.start).toHaveBeenCalledWith(result.user.id);
       expect(result.accessToken).toBe('access-token');
     });
 

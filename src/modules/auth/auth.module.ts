@@ -5,7 +5,9 @@ import { LoginUseCase } from '../../application/auth/Login.use-case';
 import { RegisterUseCase } from '../../application/auth/Register.use-case';
 import {
   CREDENTIALS_REPOSITORY,
+  OPAQUE_TOKEN_SERVICE,
   PASSWORD_SERVICE,
+  REFRESH_TOKEN_REPOSITORY,
   TOKEN_SERVICE,
   USER_REPOSITORY,
 } from '../../common/constants/injection-tokens.constants';
@@ -19,6 +21,11 @@ import { OAuthUseCase } from '../../application/auth/OAuth.use-case';
 import { DrizzleUserRepository } from '../../infrastructure/orm/repositories/DrizzleUser.repository';
 import { DrizzleCredentialsRepository } from '../../infrastructure/orm/repositories/DrizzleCredentials.repository';
 import { RefreshTokenUseCase } from '../../application/auth/RefreshToken.use-case';
+import { LogoutUseCase } from '../../application/auth/Logout.use-case';
+import { SessionIssuer } from '../../application/auth/SessionIssuer';
+import { DrizzleRefreshTokenRepository } from '../../infrastructure/orm/repositories/DrizzleRefreshToken.repository';
+import { CryptoOpaqueTokenService } from './services/CryptoOpaqueToken.service';
+import { RefreshTokenCookie } from './RefreshTokenCookie';
 
 @Module({
   imports: [
@@ -39,7 +46,18 @@ import { RefreshTokenUseCase } from '../../application/auth/RefreshToken.use-cas
     LoginUseCase,
     RegisterUseCase,
     RefreshTokenUseCase,
+    LogoutUseCase,
     OAuthUseCase,
+    SessionIssuer,
+    RefreshTokenCookie,
+    {
+      provide: OPAQUE_TOKEN_SERVICE,
+      useClass: CryptoOpaqueTokenService,
+    },
+    {
+      provide: REFRESH_TOKEN_REPOSITORY,
+      useClass: DrizzleRefreshTokenRepository,
+    },
     {
       provide: TOKEN_SERVICE,
       useClass: JwtTokenService,

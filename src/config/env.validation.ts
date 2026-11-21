@@ -21,7 +21,7 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  CORS_ORIGIN: string = 'http://localhost:3000';
+  CORS_ORIGIN: string = 'http://localhost:5190,http://localhost:4190';
 
   @IsString()
   @IsOptional()
@@ -62,6 +62,14 @@ class EnvironmentVariables {
 
   @IsString()
   JWT_EXPIRES_IN!: string;
+
+  @IsIn(['true', 'false'])
+  @IsOptional()
+  REFRESH_COOKIE_SECURE?: string;
+
+  @IsIn(['strict', 'lax', 'none'])
+  @IsOptional()
+  REFRESH_COOKIE_SAME_SITE?: string;
 
   @IsString()
   GOOGLE_CLIENT_ID!: string;

@@ -11,3 +11,5 @@ export * from './Password.service';
 export * from './Token.service';
 export * from './Vote.repository';
 export * from './Comment.repository';
+export * from './RefreshToken.repository';
+export * from './OpaqueToken.service';

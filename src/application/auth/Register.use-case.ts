@@ -2,17 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   CREDENTIALS_REPOSITORY,
   PASSWORD_SERVICE,
-  TOKEN_SERVICE,
   USER_REPOSITORY,
 } from '../../common/constants/injection-tokens.constants';
 import type { UserRepository } from '../gateway/User.repository';
 import { PointsBalanceVO } from '../../domain/value-objects/PointsBalance.vo';
 import type { CredentialsRepository } from '../gateway/Credentials.repository';
-import type { TokenService } from '../gateway/Token.service';
 import { User } from '../../domain/entities/User';
 import { UuidGenerator } from '../../common/utils/UuidGenerator';
 import { UserCredentials } from '../../domain/entities/UserCredentials';
-import type { AccessToken } from '../types/auth.types';
+import type { IssuedRefreshToken, AccessToken } from '../types/auth.types';
+import { SessionIssuer } from './SessionIssuer';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/EmailAlreadyInUse.exception';
 import type { PasswordService } from '../gateway/Password.service';
 
@@ -25,6 +24,7 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   user: User;
   accessToken: AccessToken;
+  refreshToken: IssuedRefreshToken;
 }
 
 @Injectable()
@@ -34,8 +34,7 @@ export class RegisterUseCase {
     private readonly userRepository: UserRepository,
     @Inject(CREDENTIALS_REPOSITORY)
     private readonly credentialsRepository: CredentialsRepository,
-    @Inject(TOKEN_SERVICE)
-    private readonly tokenService: TokenService,
+    private readonly sessionIssuer: SessionIssuer,
     @Inject(PASSWORD_SERVICE)
     private readonly passwordService: PasswordService,
   ) {}
@@ -67,11 +66,14 @@ export class RegisterUseCase {
     });
     await this.credentialsRepository.create(credentials);
 
-    const accessToken = await this.tokenService.sign(newUser.id);
+    const { accessToken, refreshToken } = await this.sessionIssuer.start(
+      newUser.id,
+    );
 
     return {
       user: newUser,
       accessToken,
+      refreshToken,
     };
   }
 }

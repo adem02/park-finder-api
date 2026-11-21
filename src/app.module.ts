@@ -7,6 +7,7 @@ import databaseConfig from './config/database.config';
 import redisConfig from './config/redis.config';
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
+import authConfig from './config/auth.config';
 import googleConfig from './config/google.config';
 import appleConfig from './config/apple.config';
 import cloudinaryConfig from './config/cloudinary.config';
@@ -33,6 +34,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
         redisConfig,
         appConfig,
         jwtConfig,
+        authConfig,
         googleConfig,
         appleConfig,
         cloudinaryConfig,
