@@ -6,13 +6,12 @@ import { UuidGenerator } from '../../common/utils/UuidGenerator';
 import {
   APP_LOGGER,
   CREDENTIALS_REPOSITORY,
-  TOKEN_SERVICE,
   USER_REPOSITORY,
 } from '../../common/constants/injection-tokens.constants';
 import type { UserRepository } from '../gateway/User.repository';
 import type { CredentialsRepository } from '../gateway/Credentials.repository';
-import type { TokenService } from '../gateway/Token.service';
-import type { AccessToken } from '../types/auth.types';
+import type { IssuedRefreshToken, AccessToken } from '../types/auth.types';
+import { SessionIssuer } from './SessionIssuer';
 import type { Logger } from '../../common/interfaces/Logger';
 
 export interface OAuthRequest {
@@ -27,6 +26,7 @@ export interface OAuthRequest {
 export interface OAuthResponse {
   user: User;
   accessToken: AccessToken;
+  refreshToken: IssuedRefreshToken;
 }
 
 @Injectable()
@@ -36,8 +36,7 @@ export class OAuthUseCase {
     private readonly userRepository: UserRepository,
     @Inject(CREDENTIALS_REPOSITORY)
     private readonly credentialsRepository: CredentialsRepository,
-    @Inject(TOKEN_SERVICE)
-    private readonly tokenService: TokenService,
+    private readonly sessionIssuer: SessionIssuer,
     @Inject(APP_LOGGER)
     private readonly logger: Logger,
   ) {}
@@ -103,7 +102,9 @@ export class OAuthUseCase {
       ? await this.findExistingUser(existing.userId)
       : await this.createUserFromOAuth(request);
 
-    const accessToken = await this.tokenService.sign(user.id);
-    return { user, accessToken };
+    const { accessToken, refreshToken } = await this.sessionIssuer.start(
+      user.id,
+    );
+    return { user, accessToken, refreshToken };
   }
 }

@@ -4,6 +4,9 @@ import { ConfigType } from '@nestjs/config';
 import { ConsoleLogger, ValidationPipe, Logger } from '@nestjs/common';
 import appConfig from './config/app.config';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import { buildCorsOptions } from './config/cors';
+import { REFRESH_COOKIE_NAME } from './config/auth.config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -16,9 +19,13 @@ async function bootstrap() {
   const config = app.get<ConfigType<typeof appConfig>>(appConfig.KEY);
   const logger = new Logger('Bootstrap');
 
-  app.enableCors({
-    origin: config.corsOrigin,
-  });
+  const cors = buildCorsOptions(config.corsOrigin, config.nodeEnv);
+  app.enableCors(cors.options);
+  if (cors.allowsAnyOrigin) {
+    logger.warn('CORS_ORIGIN=* : every origin is allowed (development only).');
+  }
+
+  app.use(cookieParser());
 
   app.use(helmet());
 
@@ -35,6 +42,7 @@ async function bootstrap() {
     .setDescription('Park Finder API')
     .setVersion('1.0')
     .addBearerAuth()
+    .addCookieAuth(REFRESH_COOKIE_NAME)
     .build();
 
   const documentFactory = () =>

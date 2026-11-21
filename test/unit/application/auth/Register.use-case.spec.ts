@@ -4,7 +4,7 @@ import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBala
 import { User } from '../../../../src/domain/entities/User';
 import type { UserRepository } from '../../../../src/application/gateway/User.repository';
 import type { CredentialsRepository } from '../../../../src/application/gateway/Credentials.repository';
-import type { TokenService } from '../../../../src/application/gateway/Token.service';
+import { makeSessionIssuer } from './support/session-issuer.mock';
 import type { PasswordService } from '../../../../src/application/gateway/Password.service';
 
 const makeUser = () =>
@@ -37,11 +37,6 @@ const makeCredentialsRepository = (): jest.Mocked<CredentialsRepository> => ({
   findLocalByUserId: jest.fn(),
 });
 
-const makeTokenService = (): jest.Mocked<TokenService> => ({
-  sign: jest.fn().mockResolvedValue('access-token'),
-  verify: jest.fn(),
-});
-
 const makePasswordService = (): jest.Mocked<PasswordService> => ({
   hash: jest.fn().mockResolvedValue('hashed-password'),
   compare: jest.fn(),
@@ -52,13 +47,13 @@ const makeUseCase = (
 ) => {
   const userRepository = makeUserRepository(userRepositoryOverrides);
   const credentialsRepository = makeCredentialsRepository();
-  const tokenService = makeTokenService();
+  const sessionIssuer = makeSessionIssuer();
   const passwordService = makePasswordService();
 
   const useCase = new RegisterUseCase(
     userRepository,
     credentialsRepository,
-    tokenService,
+    sessionIssuer,
     passwordService,
   );
 
@@ -66,7 +61,7 @@ const makeUseCase = (
     useCase,
     userRepository,
     credentialsRepository,
-    tokenService,
+    sessionIssuer,
     passwordService,
   };
 };
@@ -84,7 +79,7 @@ describe('RegisterUseCase', () => {
         useCase,
         userRepository,
         credentialsRepository,
-        tokenService,
+        sessionIssuer,
         passwordService,
       } = makeUseCase();
 
@@ -93,7 +88,7 @@ describe('RegisterUseCase', () => {
       expect(passwordService.hash).toHaveBeenCalledWith(validRequest.password);
       expect(userRepository.create).toHaveBeenCalledTimes(1);
       expect(credentialsRepository.create).toHaveBeenCalledTimes(1);
-      expect(tokenService.sign).toHaveBeenCalledWith(result.user.id);
+      expect(sessionIssuer.start).toHaveBeenCalledWith(result.user.id);
       expect(result.accessToken).toBe('access-token');
       expect(result.user.email).toBe(validRequest.email);
       expect(result.user.username).toBe(validRequest.username);

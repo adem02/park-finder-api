@@ -1,14 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { User } from '../../domain/entities/User';
-import type { AccessToken } from '../types/auth.types';
+import type { IssuedRefreshToken, AccessToken } from '../types/auth.types';
+import { SessionIssuer } from './SessionIssuer';
 import {
   CREDENTIALS_REPOSITORY,
   PASSWORD_SERVICE,
-  TOKEN_SERVICE,
   USER_REPOSITORY,
 } from '../../common/constants/injection-tokens.constants';
 import type { CredentialsRepository } from '../gateway/Credentials.repository';
-import type { TokenService } from '../gateway/Token.service';
 import type { UserRepository } from '../gateway/User.repository';
 import { WrongEmailOrPasswordException } from '../../domain/exceptions/WrongEmailOrPassword.exception';
 import { InvalidProviderException } from '../../domain/exceptions/InvalidProvider.exception';
@@ -22,6 +21,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   user: User;
   accessToken: AccessToken;
+  refreshToken: IssuedRefreshToken;
 }
 
 @Injectable()
@@ -31,8 +31,7 @@ export class LoginUseCase {
     private readonly credentialsRepository: CredentialsRepository,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
-    @Inject(TOKEN_SERVICE)
-    private readonly tokenService: TokenService,
+    private readonly sessionIssuer: SessionIssuer,
     @Inject(PASSWORD_SERVICE)
     private readonly passwordService: PasswordService,
   ) {}
@@ -67,11 +66,14 @@ export class LoginUseCase {
       throw new WrongEmailOrPasswordException();
     }
 
-    const accessToken = await this.tokenService.sign(user.id);
+    const { accessToken, refreshToken } = await this.sessionIssuer.start(
+      user.id,
+    );
 
     return {
       user,
       accessToken,
+      refreshToken,
     };
   }
 }

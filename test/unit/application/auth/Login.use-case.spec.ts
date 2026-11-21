@@ -6,7 +6,7 @@ import { UserCredentials } from '../../../../src/domain/entities/UserCredentials
 import { PointsBalanceVO } from '../../../../src/domain/value-objects/PointsBalance.vo';
 import type { UserRepository } from '../../../../src/application/gateway/User.repository';
 import type { CredentialsRepository } from '../../../../src/application/gateway/Credentials.repository';
-import type { TokenService } from '../../../../src/application/gateway/Token.service';
+import { makeSessionIssuer } from './support/session-issuer.mock';
 import type { PasswordService } from '../../../../src/application/gateway/Password.service';
 
 const makeUser = () =>
@@ -50,11 +50,6 @@ const makeCredentialsRepository = (
   ...overrides,
 });
 
-const makeTokenService = (): jest.Mocked<TokenService> => ({
-  sign: jest.fn().mockResolvedValue('access-token'),
-  verify: jest.fn(),
-});
-
 const makePasswordService = (isMatch = true): jest.Mocked<PasswordService> => ({
   hash: jest.fn(),
   compare: jest.fn().mockResolvedValue(isMatch),
@@ -71,13 +66,13 @@ const makeUseCase = (
   const credentialsRepository = makeCredentialsRepository(
     overrides.credentialsRepository,
   );
-  const tokenService = makeTokenService();
+  const sessionIssuer = makeSessionIssuer();
   const passwordService = overrides.passwordService ?? makePasswordService();
 
   const useCase = new LoginUseCase(
     credentialsRepository,
     userRepository,
-    tokenService,
+    sessionIssuer,
     passwordService,
   );
 
@@ -85,7 +80,7 @@ const makeUseCase = (
     useCase,
     userRepository,
     credentialsRepository,
-    tokenService,
+    sessionIssuer,
     passwordService,
   };
 };
@@ -95,13 +90,13 @@ const validRequest = { email: 'john@example.com', password: 'Secret1!' };
 describe('LoginUseCase', () => {
   describe('execute', () => {
     it('should return user and access token on valid credentials', async () => {
-      const { useCase, tokenService } = makeUseCase();
+      const { useCase, sessionIssuer } = makeUseCase();
 
       const result = await useCase.execute(validRequest);
 
       expect(result.accessToken).toBe('access-token');
       expect(result.user.email).toBe(validRequest.email);
-      expect(tokenService.sign).toHaveBeenCalledWith('user-1');
+      expect(sessionIssuer.start).toHaveBeenCalledWith('user-1');
     });
 
     it('should throw WrongEmailOrPasswordException if user not found', async () => {
