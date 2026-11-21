@@ -60,3 +60,6 @@ prisma/seed.ts
 
 #http
 http/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
