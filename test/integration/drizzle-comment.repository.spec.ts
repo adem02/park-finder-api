@@ -5,6 +5,7 @@ import {
 } from './support/database/create-test-database';
 import { resetDatabase } from './support/database/reset-database';
 import { TestDataFactory } from './support/factories/test-data.factory';
+import type { CommentRow } from './support/builders/comment.builder';
 
 describe('DrizzleCommentRepository (integration)', () => {
   let testDb: TestDatabase;
@@ -29,7 +30,7 @@ describe('DrizzleCommentRepository (integration)', () => {
   // ordering/pagination assertions below are deterministic.
   const createSequentialComments = async (parkingId: string, count: number) => {
     const base = Date.now();
-    const comments = [];
+    const comments: CommentRow[] = [];
     for (let i = 0; i < count; i++) {
       comments.push(
         await factory

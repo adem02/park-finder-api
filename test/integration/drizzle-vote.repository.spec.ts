@@ -1,5 +1,6 @@
 import { DrizzleVoteRepository } from '../../src/infrastructure/orm/repositories/DrizzleVote.repository';
 import { VoteMapper } from '../../src/infrastructure/orm/mapper/Vote.mapper';
+import { VoteType } from '../../src/domain/types/vote.types';
 import { ResourceNotFoundException } from '../../src/domain/exceptions/ResourceNotFound.exception';
 import {
   createTestDatabase,
@@ -84,7 +85,7 @@ describe('DrizzleVoteRepository (integration)', () => {
         .create();
 
       const changed = VoteMapper.toDomain({ ...row, updatedAt: null }).change(
-        'DOWNVOTE',
+        VoteType.DOWNVOTE,
       );
       await repository.update(changed);
 
