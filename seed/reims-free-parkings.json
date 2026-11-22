@@ -1,0 +1,639 @@
+[
+  {
+    "id": "osm-way-31328175",
+    "name": "Place René Clair",
+    "totalSpots": 30,
+    "latitude": 49.21341,
+    "longitude": 4.02606
+  },
+  {
+    "id": "osm-way-31328198",
+    "name": "Parking de surface n°1",
+    "totalSpots": 356,
+    "latitude": 49.213379,
+    "longitude": 4.016921
+  },
+  {
+    "id": "osm-way-41532800",
+    "name": "P1",
+    "totalSpots": 471,
+    "latitude": 49.245719,
+    "longitude": 4.026573
+  },
+  {
+    "id": "osm-way-42730192",
+    "name": "Parking de surface n°2",
+    "totalSpots": 108,
+    "latitude": 49.236928,
+    "longitude": 4.072487
+  },
+  {
+    "id": "osm-way-93399108",
+    "name": "Parking René Tys",
+    "totalSpots": 250,
+    "latitude": 49.244459,
+    "longitude": 4.026273
+  },
+  {
+    "id": "osm-way-93471852",
+    "name": "Parking de surface n°3",
+    "totalSpots": 500,
+    "latitude": 49.25987,
+    "longitude": 4.065852
+  },
+  {
+    "id": "osm-way-93880020",
+    "name": "Parking de surface n°4",
+    "totalSpots": 500,
+    "latitude": 49.286618,
+    "longitude": 4.02415
+  },
+  {
+    "id": "osm-way-93880061",
+    "name": "Parking de surface n°5",
+    "totalSpots": 45,
+    "latitude": 49.28987,
+    "longitude": 4.024772
+  },
+  {
+    "id": "osm-way-93880063",
+    "name": "Parking de surface n°6",
+    "totalSpots": 252,
+    "latitude": 49.288404,
+    "longitude": 4.025915
+  },
+  {
+    "id": "osm-way-93880065",
+    "name": "Parking de surface n°7",
+    "totalSpots": 311,
+    "latitude": 49.289377,
+    "longitude": 4.026056
+  },
+  {
+    "id": "osm-way-93880071",
+    "name": "Parking de surface n°8",
+    "totalSpots": 31,
+    "latitude": 49.28946,
+    "longitude": 4.025118
+  },
+  {
+    "id": "osm-way-93880088",
+    "name": "Parking de surface n°9",
+    "totalSpots": 32,
+    "latitude": 49.289052,
+    "longitude": 4.024835
+  },
+  {
+    "id": "osm-way-93882420",
+    "name": "Parking de surface n°10",
+    "totalSpots": 361,
+    "latitude": 49.289582,
+    "longitude": 4.022902
+  },
+  {
+    "id": "osm-way-93882428",
+    "name": "Parking de surface n°11",
+    "totalSpots": 243,
+    "latitude": 49.288403,
+    "longitude": 4.022498
+  },
+  {
+    "id": "osm-way-93883698",
+    "name": "Parking de surface n°12",
+    "totalSpots": 304,
+    "latitude": 49.292492,
+    "longitude": 4.013499
+  },
+  {
+    "id": "osm-way-94666776",
+    "name": "Parking de surface n°13",
+    "totalSpots": 68,
+    "latitude": 49.237182,
+    "longitude": 4.007028
+  },
+  {
+    "id": "osm-way-94666778",
+    "name": "Parking de surface n°14",
+    "totalSpots": 100,
+    "latitude": 49.239284,
+    "longitude": 4.010356
+  },
+  {
+    "id": "osm-way-94666782",
+    "name": "Parking de surface n°15",
+    "totalSpots": 46,
+    "latitude": 49.238307,
+    "longitude": 4.008822
+  },
+  {
+    "id": "osm-way-95810750",
+    "name": "Parking de surface n°16",
+    "totalSpots": 57,
+    "latitude": 49.269032,
+    "longitude": 4.035742
+  },
+  {
+    "id": "osm-way-95810755",
+    "name": "Parking de surface n°17",
+    "totalSpots": 217,
+    "latitude": 49.269253,
+    "longitude": 4.036761
+  },
+  {
+    "id": "osm-way-159921421",
+    "name": "Parking de surface n°18",
+    "totalSpots": 81,
+    "latitude": 49.213677,
+    "longitude": 4.014072
+  },
+  {
+    "id": "osm-way-224855490",
+    "name": "Boulingrin",
+    "totalSpots": 266,
+    "latitude": 49.260952,
+    "longitude": 4.03214
+  },
+  {
+    "id": "osm-way-225662968",
+    "name": "Parking de surface n°19",
+    "totalSpots": 176,
+    "latitude": 49.265011,
+    "longitude": 4.009241
+  },
+  {
+    "id": "osm-way-225666531",
+    "name": "Parking Stade Delaune P4",
+    "totalSpots": 416,
+    "latitude": 49.248174,
+    "longitude": 4.023001
+  },
+  {
+    "id": "osm-way-226078690",
+    "name": "Parking de surface n°20",
+    "totalSpots": 32,
+    "latitude": 49.235431,
+    "longitude": 4.003839
+  },
+  {
+    "id": "osm-way-287920770",
+    "name": "BurgerKing",
+    "totalSpots": 65,
+    "latitude": 49.287466,
+    "longitude": 4.026742
+  },
+  {
+    "id": "osm-way-323471911",
+    "name": "Parking de surface n°21",
+    "totalSpots": 240,
+    "latitude": 49.252146,
+    "longitude": 4.046569
+  },
+  {
+    "id": "osm-way-393508946",
+    "name": "Parking de surface n°22",
+    "totalSpots": 82,
+    "latitude": 49.240455,
+    "longitude": 4.076993
+  },
+  {
+    "id": "osm-way-393508949",
+    "name": "Parking de surface n°23",
+    "totalSpots": 85,
+    "latitude": 49.241277,
+    "longitude": 4.077885
+  },
+  {
+    "id": "osm-way-393508953",
+    "name": "Parking de surface n°24",
+    "totalSpots": 55,
+    "latitude": 49.240044,
+    "longitude": 4.07698
+  },
+  {
+    "id": "osm-way-393508958",
+    "name": "Parking de surface n°25",
+    "totalSpots": 32,
+    "latitude": 49.235006,
+    "longitude": 4.088195
+  },
+  {
+    "id": "osm-way-393508965",
+    "name": "Parking de surface n°26",
+    "totalSpots": 8,
+    "latitude": 49.235397,
+    "longitude": 4.088146
+  },
+  {
+    "id": "osm-way-393508966",
+    "name": "Parking de surface n°27",
+    "totalSpots": 62,
+    "latitude": 49.240834,
+    "longitude": 4.077385
+  },
+  {
+    "id": "osm-way-393508967",
+    "name": "Parking de surface n°28",
+    "totalSpots": 26,
+    "latitude": 49.240373,
+    "longitude": 4.075918
+  },
+  {
+    "id": "osm-way-393508968",
+    "name": "Parking de surface n°29",
+    "totalSpots": 52,
+    "latitude": 49.240952,
+    "longitude": 4.076273
+  },
+  {
+    "id": "osm-way-394051232",
+    "name": "Parking de surface n°30",
+    "totalSpots": 58,
+    "latitude": 49.282283,
+    "longitude": 4.0181
+  },
+  {
+    "id": "osm-way-394051236",
+    "name": "Parking de surface n°31",
+    "totalSpots": 60,
+    "latitude": 49.287205,
+    "longitude": 4.009749
+  },
+  {
+    "id": "osm-way-394051341",
+    "name": "Parking de surface n°32",
+    "totalSpots": 74,
+    "latitude": 49.287842,
+    "longitude": 4.013925
+  },
+  {
+    "id": "osm-way-394051344",
+    "name": "Parking de surface n°33",
+    "totalSpots": 71,
+    "latitude": 49.282836,
+    "longitude": 4.017386
+  },
+  {
+    "id": "osm-way-427456479",
+    "name": "Parking de surface n°34",
+    "totalSpots": 96,
+    "latitude": 49.223076,
+    "longitude": 4.030295
+  },
+  {
+    "id": "osm-way-494436296",
+    "name": "Parking de surface n°35",
+    "totalSpots": 113,
+    "latitude": 49.212331,
+    "longitude": 4.026629
+  },
+  {
+    "id": "osm-way-494436297",
+    "name": "Parking de surface n°36",
+    "totalSpots": 13,
+    "latitude": 49.211779,
+    "longitude": 4.025479
+  },
+  {
+    "id": "osm-way-531465809",
+    "name": "Parking de surface n°37",
+    "totalSpots": 50,
+    "latitude": 49.243235,
+    "longitude": 4.051183
+  },
+  {
+    "id": "osm-way-557020461",
+    "name": "Parking de surface n°38",
+    "totalSpots": 29,
+    "latitude": 49.247187,
+    "longitude": 4.064657
+  },
+  {
+    "id": "osm-way-592748281",
+    "name": "Parking Hôpital Debré",
+    "totalSpots": 212,
+    "latitude": 49.225854,
+    "longitude": 4.019395
+  },
+  {
+    "id": "osm-way-633460197",
+    "name": "Parking de surface n°39",
+    "totalSpots": 270,
+    "latitude": 49.266097,
+    "longitude": 4.039453
+  },
+  {
+    "id": "osm-way-659660484",
+    "name": "Parking de surface n°40",
+    "totalSpots": 500,
+    "latitude": 49.240648,
+    "longitude": 4.084947
+  },
+  {
+    "id": "osm-way-662913075",
+    "name": "Parking de surface n°41",
+    "totalSpots": 41,
+    "latitude": 49.248666,
+    "longitude": 4.063758
+  },
+  {
+    "id": "osm-way-718387506",
+    "name": "Parking de surface n°42",
+    "totalSpots": 118,
+    "latitude": 49.25982,
+    "longitude": 4.009588
+  },
+  {
+    "id": "osm-way-727134216",
+    "name": "Parking de surface n°43",
+    "totalSpots": 52,
+    "latitude": 49.241701,
+    "longitude": 4.08246
+  },
+  {
+    "id": "osm-way-757668830",
+    "name": "Parking de surface n°44",
+    "totalSpots": 80,
+    "latitude": 49.230478,
+    "longitude": 4.085097
+  },
+  {
+    "id": "osm-way-768637256",
+    "name": "Parking de surface n°45",
+    "totalSpots": 4,
+    "latitude": 49.212149,
+    "longitude": 4.022689
+  },
+  {
+    "id": "osm-way-768641463",
+    "name": "Parking en bord de rue n°46",
+    "totalSpots": 6,
+    "latitude": 49.211858,
+    "longitude": 4.018964
+  },
+  {
+    "id": "osm-way-768778867",
+    "name": "Parking de surface n°47",
+    "totalSpots": 169,
+    "latitude": 49.221538,
+    "longitude": 4.017265
+  },
+  {
+    "id": "osm-way-776731532",
+    "name": "Parking de surface n°48",
+    "totalSpots": 68,
+    "latitude": 49.242806,
+    "longitude": 4.02459
+  },
+  {
+    "id": "osm-way-777425022",
+    "name": "Parking de surface n°49",
+    "totalSpots": 182,
+    "latitude": 49.241004,
+    "longitude": 4.031575
+  },
+  {
+    "id": "osm-way-777518938",
+    "name": "Parking Basilique Saint-Remi",
+    "totalSpots": 55,
+    "latitude": 49.242302,
+    "longitude": 4.041519
+  },
+  {
+    "id": "osm-way-787504570",
+    "name": "Parking de surface n°50",
+    "totalSpots": 41,
+    "latitude": 49.26139,
+    "longitude": 4.058495
+  },
+  {
+    "id": "osm-way-787919890",
+    "name": "Parking de surface n°51",
+    "totalSpots": 33,
+    "latitude": 49.276992,
+    "longitude": 4.021534
+  },
+  {
+    "id": "osm-way-792980126",
+    "name": "Parking de surface n°52",
+    "totalSpots": 10,
+    "latitude": 49.248208,
+    "longitude": 4.029135
+  },
+  {
+    "id": "osm-way-792980130",
+    "name": "Parking en bord de rue n°53",
+    "totalSpots": 4,
+    "latitude": 49.248405,
+    "longitude": 4.028626
+  },
+  {
+    "id": "osm-way-792980132",
+    "name": "Parking en bord de rue n°54",
+    "totalSpots": 10,
+    "latitude": 49.248517,
+    "longitude": 4.028386
+  },
+  {
+    "id": "osm-way-796512496",
+    "name": "Parking de surface n°55",
+    "totalSpots": 2,
+    "latitude": 49.252688,
+    "longitude": 4.0477
+  },
+  {
+    "id": "osm-way-802022091",
+    "name": "Parking de surface n°56",
+    "totalSpots": 3,
+    "latitude": 49.246417,
+    "longitude": 4.051
+  },
+  {
+    "id": "osm-way-807996583",
+    "name": "Parking de surface n°57",
+    "totalSpots": 134,
+    "latitude": 49.271368,
+    "longitude": 4.069658
+  },
+  {
+    "id": "osm-way-809477196",
+    "name": "Parking n°58",
+    "totalSpots": 13,
+    "latitude": 49.234365,
+    "longitude": 4.087307
+  },
+  {
+    "id": "osm-way-826899391",
+    "name": "Parking de surface n°59",
+    "totalSpots": 11,
+    "latitude": 49.252358,
+    "longitude": 4.030804
+  },
+  {
+    "id": "osm-way-835516283",
+    "name": "Parking en bord de rue n°60",
+    "totalSpots": 23,
+    "latitude": 49.261792,
+    "longitude": 4.009571
+  },
+  {
+    "id": "osm-way-836863916",
+    "name": "Parking n°61",
+    "totalSpots": 3,
+    "latitude": 49.229353,
+    "longitude": 4.06052
+  },
+  {
+    "id": "osm-way-860580659",
+    "name": "Parking de surface n°62",
+    "totalSpots": 59,
+    "latitude": 49.238687,
+    "longitude": 4.034511
+  },
+  {
+    "id": "osm-way-933912081",
+    "name": "Parking en bord de rue n°63",
+    "totalSpots": 16,
+    "latitude": 49.211463,
+    "longitude": 4.020142
+  },
+  {
+    "id": "osm-way-1019793575",
+    "name": "Parking n°64",
+    "totalSpots": 38,
+    "latitude": 49.235736,
+    "longitude": 4.085199
+  },
+  {
+    "id": "osm-way-1059958049",
+    "name": "Parking en bord de rue n°65",
+    "totalSpots": 13,
+    "latitude": 49.248398,
+    "longitude": 4.029875
+  },
+  {
+    "id": "osm-way-1059958070",
+    "name": "Parking en bord de rue n°66",
+    "totalSpots": 6,
+    "latitude": 49.248277,
+    "longitude": 4.029484
+  },
+  {
+    "id": "osm-way-1060200222",
+    "name": "Parking en bord de rue n°67",
+    "totalSpots": 7,
+    "latitude": 49.248895,
+    "longitude": 4.028096
+  },
+  {
+    "id": "osm-way-1062350955",
+    "name": "Parking de surface n°68",
+    "totalSpots": 52,
+    "latitude": 49.286693,
+    "longitude": 4.026481
+  },
+  {
+    "id": "osm-way-1078961190",
+    "name": "Parking en bord de rue n°69",
+    "totalSpots": 6,
+    "latitude": 49.264241,
+    "longitude": 4.013485
+  },
+  {
+    "id": "osm-way-1107967958",
+    "name": "Parking de surface n°70",
+    "totalSpots": 37,
+    "latitude": 49.282743,
+    "longitude": 4.019791
+  },
+  {
+    "id": "osm-way-1148275639",
+    "name": "Parking en bord de rue n°71",
+    "totalSpots": 5,
+    "latitude": 49.238174,
+    "longitude": 4.032653
+  },
+  {
+    "id": "osm-way-1148275640",
+    "name": "Parking en bord de rue n°72",
+    "totalSpots": 5,
+    "latitude": 49.237858,
+    "longitude": 4.032382
+  },
+  {
+    "id": "osm-way-1148275641",
+    "name": "Parking de surface n°73",
+    "totalSpots": 22,
+    "latitude": 49.23802,
+    "longitude": 4.032133
+  },
+  {
+    "id": "osm-way-1201941316",
+    "name": "Parking de surface n°74",
+    "totalSpots": 5,
+    "latitude": 49.257614,
+    "longitude": 4.022645
+  },
+  {
+    "id": "osm-way-1201941317",
+    "name": "Parking de surface n°75",
+    "totalSpots": 15,
+    "latitude": 49.257937,
+    "longitude": 4.023178
+  },
+  {
+    "id": "osm-way-1456893707",
+    "name": "Parking n°76",
+    "totalSpots": 195,
+    "latitude": 49.238888,
+    "longitude": 4.086289
+  },
+  {
+    "id": "osm-way-1456893727",
+    "name": "Parking n°77",
+    "totalSpots": 107,
+    "latitude": 49.235094,
+    "longitude": 4.08448
+  },
+  {
+    "id": "osm-way-1456893728",
+    "name": "Parking n°78",
+    "totalSpots": 164,
+    "latitude": 49.234509,
+    "longitude": 4.085788
+  },
+  {
+    "id": "osm-way-1458522895",
+    "name": "Parking n°79",
+    "totalSpots": 14,
+    "latitude": 49.236155,
+    "longitude": 4.083948
+  },
+  {
+    "id": "osm-way-1458522900",
+    "name": "Parking n°80",
+    "totalSpots": 6,
+    "latitude": 49.237376,
+    "longitude": 4.081359
+  },
+  {
+    "id": "osm-way-1458522901",
+    "name": "Parking n°81",
+    "totalSpots": 5,
+    "latitude": 49.237197,
+    "longitude": 4.081301
+  },
+  {
+    "id": "osm-way-1458522903",
+    "name": "Parking n°82",
+    "totalSpots": 11,
+    "latitude": 49.236819,
+    "longitude": 4.082108
+  },
+  {
+    "id": "osm-node-2168503799",
+    "name": "Parking de surface n°83",
+    "totalSpots": 10,
+    "latitude": 49.227508,
+    "longitude": 4.070115
+  }
+]
