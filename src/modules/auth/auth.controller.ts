@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  UnauthorizedException,
   Get,
   HttpCode,
   Post,
@@ -9,7 +10,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import {
   ApiCookieAuth,
@@ -31,6 +31,9 @@ import { Public } from './decorators/public.decorator';
 import { OAuthOutputDTO } from './dto/OAuth.dto';
 import { RefreshTokenOutputDTO } from './dto/RefreshToken.dto';
 import { RefreshTokenCookie } from './RefreshTokenCookie';
+import { AppleOAuthGuard, GoogleOAuthGuard } from './oauth/OAuthProviderGuard';
+import { OAuthProviders } from './oauth/OAuthProviders';
+import { OAuthRedirect } from './oauth/OAuthRedirect';
 
 /**
  * Every login (register, password, OAuth) returns the access token in the body
@@ -45,6 +48,8 @@ export class AuthController {
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly refreshCookie: RefreshTokenCookie,
+    private readonly oauthRedirect: OAuthRedirect,
+    private readonly oauthProviders: OAuthProviders,
   ) {}
 
   @Post('register')
@@ -77,31 +82,51 @@ export class AuthController {
 
   @Get('google')
   @Public()
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Start Google OAuth login flow' })
-  googleAuth() {}
+  @UseGuards(GoogleOAuthGuard)
+  @ApiOperation({
+    summary:
+      'Start Google sign-in (redirects to Google, or back to the PWA if Google is not configured)',
+  })
+  @ApiResponse({ status: 302 })
+  googleAuth(@Res() res: Response) {
+    // Reached only when Google is not configured: passport otherwise redirects to Google.
+    this.oauthRedirect.failure(res, 'google_unavailable');
+  }
 
   @Get('google/callback')
   @Public()
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Google OAuth callback' })
-  @ApiResponse({ status: 200, type: OAuthOutputDTO })
-  googleCallback(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    return this.completeOAuth(req, res);
+  @UseGuards(GoogleOAuthGuard)
+  @ApiOperation({
+    summary:
+      'Google callback: sets the refresh cookie and redirects to the PWA (no token in the URL)',
+  })
+  @ApiResponse({ status: 302 })
+  googleCallback(@Req() req: Request, @Res() res: Response) {
+    const response = req.user as unknown as OAuthResponse | null | undefined;
+    if (!response) {
+      // Consent refused, invalid state or provider error.
+      this.oauthRedirect.failure(
+        res,
+        this.oauthProviders.isConfigured('google')
+          ? 'google_failed'
+          : 'google_unavailable',
+      );
+      return;
+    }
+
+    this.refreshCookie.write(res, response.refreshToken);
+    this.oauthRedirect.success(res);
   }
 
   @Get('apple')
   @Public()
-  @UseGuards(AuthGuard('apple'))
+  @UseGuards(AppleOAuthGuard)
   @ApiOperation({ summary: 'Start Apple OAuth login flow' })
   appleAuth() {}
 
   @Post('apple/callback')
   @Public()
-  @UseGuards(AuthGuard('apple'))
+  @UseGuards(AppleOAuthGuard)
   @ApiOperation({ summary: 'Apple OAuth callback' })
   @ApiResponse({ status: 200, type: OAuthOutputDTO })
   appleCallback(
@@ -164,8 +189,14 @@ export class AuthController {
     this.refreshCookie.clear(res);
   }
 
+  /** Apple: still a JSON answer until its sign-in is wired to the PWA like Google. */
   private completeOAuth(req: Request, res: Response): OAuthOutputDTO {
-    const response = req.user as unknown as OAuthResponse;
+    const response = req.user as unknown as OAuthResponse | null | undefined;
+    if (!response) {
+      throw new UnauthorizedException(
+        'Apple sign-in failed or is not configured',
+      );
+    }
     this.refreshCookie.write(res, response.refreshToken);
 
     return new OAuthOutputDTO(response);

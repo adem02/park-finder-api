@@ -27,6 +27,10 @@ class EnvironmentVariables {
   @IsOptional()
   BASE_URL: string = 'http://localhost:3000';
 
+  @IsString()
+  @IsOptional()
+  FRONTEND_URL: string = 'http://localhost:5190';
+
   // Unused by the app itself (the real connection uses DATABASE_URL below),
   // kept optional only because docker-compose's local postgres service still
   // consumes these to configure its own container (POSTGRES_USER/PASSWORD/DB).
