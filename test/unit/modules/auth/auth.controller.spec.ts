@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { ExecutionContext, INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
@@ -10,10 +10,14 @@ import { LogoutUseCase } from '../../../../src/application/auth/Logout.use-case'
 import { RefreshTokenUseCase } from '../../../../src/application/auth/RefreshToken.use-case';
 import { RegisterUseCase } from '../../../../src/application/auth/Register.use-case';
 import { DomainExceptionFilter } from '../../../../src/common/filters/DomainException.filter';
+import appConfig from '../../../../src/config/app.config';
 import authConfig from '../../../../src/config/auth.config';
 import { InvalidRefreshTokenException } from '../../../../src/domain/exceptions/InvalidRefreshToken.exception';
 import { AuthController } from '../../../../src/modules/auth/auth.controller';
 import { RefreshTokenCookie } from '../../../../src/modules/auth/RefreshTokenCookie';
+import { GoogleOAuthGuard } from '../../../../src/modules/auth/oauth/OAuthProviderGuard';
+import { OAuthProviders } from '../../../../src/modules/auth/oauth/OAuthProviders';
+import { OAuthRedirect } from '../../../../src/modules/auth/oauth/OAuthRedirect';
 
 const EXPIRES_AT = new Date('2026-12-21T12:00:00Z');
 const session = (value: string) => ({
@@ -32,11 +36,17 @@ describe('AuthController (HTTP, cookies)', () => {
   const loginUseCase = { execute: jest.fn() };
   const refreshTokenUseCase = { execute: jest.fn() };
   const logoutUseCase = { execute: jest.fn() };
+  const oauthProviders = { isConfigured: jest.fn().mockReturnValue(true) };
+  /** Stands in for passport: the user the Google strategy would have produced (or none). */
+  let googleUser: unknown = null;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ load: [authConfig], ignoreEnvFile: true }),
+        ConfigModule.forRoot({
+          load: [authConfig, appConfig],
+          ignoreEnvFile: true,
+        }),
       ],
       controllers: [AuthController],
       providers: [
@@ -46,8 +56,19 @@ describe('AuthController (HTTP, cookies)', () => {
         { provide: RefreshTokenUseCase, useValue: refreshTokenUseCase },
         { provide: LogoutUseCase, useValue: logoutUseCase },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
+        OAuthRedirect,
+        { provide: OAuthProviders, useValue: oauthProviders },
       ],
-    }).compile();
+    })
+      .overrideGuard(GoogleOAuthGuard)
+      .useValue({
+        canActivate: (context: ExecutionContext) => {
+          context.switchToHttp().getRequest<{ user: unknown }>().user =
+            googleUser;
+          return true;
+        },
+      })
+      .compile();
 
     app = moduleRef.createNestApplication();
     app.use(cookieParser());
@@ -60,6 +81,8 @@ describe('AuthController (HTTP, cookies)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    oauthProviders.isConfigured.mockReturnValue(true);
+    googleUser = null;
   });
 
   it('login returns the access token in the body and the refresh token in an httpOnly cookie', async () => {
@@ -131,5 +154,46 @@ describe('AuthController (HTTP, cookies)', () => {
       refreshToken: 'current',
     });
     expect(setCookies(response)[0]).toContain('pf_refresh=;');
+  });
+
+  describe('Google sign-in', () => {
+    it('callback: sets the refresh cookie and redirects to the PWA without any token in the URL', async () => {
+      googleUser = {
+        user: { id: 'user-1', username: 'johndoe' },
+        ...session('google-refresh'),
+      };
+
+      const response = await request(app.getHttpServer())
+        .get('/auth/google/callback?code=abc&state=xyz')
+        .expect(302);
+
+      expect(response.headers.location).toBe(
+        'http://localhost:5190/auth/callback',
+      );
+      expect(setCookies(response)[0]).toContain('pf_refresh=google-refresh');
+    });
+
+    it('callback without user (consent refused, bad state): back to the login page with an error code', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/auth/google/callback?error=access_denied')
+        .expect(302);
+
+      expect(response.headers.location).toBe(
+        'http://localhost:5190/login?oauthError=google_failed',
+      );
+      expect(setCookies(response)).toEqual([]);
+    });
+
+    it('start: when Google is not configured, back to the login page instead of a 500', async () => {
+      oauthProviders.isConfigured.mockReturnValue(false);
+
+      const response = await request(app.getHttpServer())
+        .get('/auth/google')
+        .expect(302);
+
+      expect(response.headers.location).toBe(
+        'http://localhost:5190/login?oauthError=google_unavailable',
+      );
+    });
   });
 });

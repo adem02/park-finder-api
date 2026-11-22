@@ -17,6 +17,9 @@ import { BcryptPasswordService } from './services/BcryptPassword.service';
 import { AuthGuard } from './guards/JwtAuth.guard';
 import { GoogleStrategy } from './strategies/Google.strategy';
 import { AppleStrategy } from './strategies/Apple.strategy';
+import { OAuthProviders } from './oauth/OAuthProviders';
+import { OAuthRedirect } from './oauth/OAuthRedirect';
+import { OAuthStateCookieStore } from './oauth/OAuthStateCookieStore';
 import { OAuthUseCase } from '../../application/auth/OAuth.use-case';
 import { DrizzleUserRepository } from '../../infrastructure/orm/repositories/DrizzleUser.repository';
 import { DrizzleCredentialsRepository } from '../../infrastructure/orm/repositories/DrizzleCredentials.repository';
@@ -41,8 +44,41 @@ import { RefreshTokenCookie } from './RefreshTokenCookie';
   controllers: [AuthController],
   providers: [
     AuthGuard,
-    GoogleStrategy,
-    AppleStrategy,
+    OAuthProviders,
+    OAuthStateCookieStore,
+    OAuthRedirect,
+    // Social providers are registered only when configured: with placeholder
+    // credentials, passport would refuse to build them and the API would not start.
+    {
+      provide: GoogleStrategy,
+      inject: [
+        ConfigService,
+        OAuthUseCase,
+        OAuthStateCookieStore,
+        OAuthProviders,
+      ],
+      useFactory: (
+        config: ConfigService,
+        oAuthUseCase: OAuthUseCase,
+        stateStore: OAuthStateCookieStore,
+        providers: OAuthProviders,
+      ) =>
+        providers.isConfigured('google')
+          ? new GoogleStrategy(config, oAuthUseCase, stateStore)
+          : null,
+    },
+    {
+      provide: AppleStrategy,
+      inject: [ConfigService, OAuthUseCase, OAuthProviders],
+      useFactory: (
+        config: ConfigService,
+        oAuthUseCase: OAuthUseCase,
+        providers: OAuthProviders,
+      ) =>
+        providers.isConfigured('apple')
+          ? new AppleStrategy(config, oAuthUseCase)
+          : null,
+    },
     LoginUseCase,
     RegisterUseCase,
     RefreshTokenUseCase,
