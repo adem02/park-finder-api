@@ -1,0 +1,150 @@
+name: Backup
+
+# Supabase Free n'a pas de sauvegarde restaurable par nous : on en fait une chaque nuit.
+# Dump des schémas de l'app, restauration d'essai sur une base jetable, chiffrement
+# avec une clé publique age, puis envoi dans un bucket Scaleway privé. La durée de
+# conservation est réglée par une règle de cycle de vie sur le bucket, pas ici.
+# Restauration : voir docs/solutions.md (dépôt workspace).
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: backup-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      WORK: ${{ runner.temp }}/backup
+      # pg_dump passe par le Session pooler (port 5432), comme les migrations.
+      DATABASE_URL: ${{ secrets.DATABASE_MIGRATIONS_URL }}
+      RESTORE_PORT: '5499'
+      RESTORE_URL: postgresql://postgres:postgres@localhost:5499/restore_check
+    steps:
+      - name: Prepare
+        env:
+          DATABASE_SSL_CA: ${{ secrets.DATABASE_SSL_CA }}
+          AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+          BUCKET: ${{ vars.BACKUP_BUCKET }}
+        run: |
+          case "$AGE_RECIPIENT" in
+            age1*) ;;
+            *) echo "BACKUP_AGE_RECIPIENT must be an age public key (age1…)."; exit 1 ;;
+          esac
+          if [ -z "$BUCKET" ]; then echo "BACKUP_BUCKET is not set."; exit 1; fi
+          mkdir -p "$WORK"
+          # Le certificat peut être collé sur une ligne avec des \n littéraux.
+          printf '%s\n' "$DATABASE_SSL_CA" | sed 's/\\n/\n/g' > "$WORK/ca.crt"
+          sudo apt-get update -qq && sudo apt-get install -y -qq age > /dev/null
+
+      # Le client doit être au moins de la version du serveur : on lit la version,
+      # puis on prend les outils Postgres et l'image PostGIS de la même version majeure.
+      - name: Inspect the production database
+        run: |
+          prod_psql() {
+            docker run --rm --network host -v "$WORK:/work" \
+              -e PGSSLMODE=verify-full -e PGSSLROOTCERT=/work/ca.crt \
+              postgres:17 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -At -c "$1"
+          }
+          version=$(prod_psql 'show server_version_num')
+          major=$((version / 10000))
+          case "$major" in
+            15|16|17) ;;
+            *) echo "Postgres $major is not handled yet: update the images in backup.yml."; exit 1 ;;
+          esac
+          postgis_schema=$(prod_psql "select extnamespace::regnamespace from pg_extension where extname = 'postgis'")
+          if [ -z "$postgis_schema" ]; then echo "PostGIS is not enabled on the production database."; exit 1; fi
+          echo "Postgres $major, PostGIS in schema $postgis_schema"
+          {
+            echo "PG_TOOLS=postgres:$major"
+            echo "POSTGIS_IMAGE=postgis/postgis:$major-3.5"
+            echo "POSTGIS_SCHEMA=$postgis_schema"
+          } >> "$GITHUB_ENV"
+
+      - name: Dump
+        run: |
+          echo "STAMP=$(date -u +%Y-%m-%dT%H%M%SZ)" >> "$GITHUB_ENV"
+          # Schémas de l'app seulement : public (tables) et drizzle (migrations appliquées).
+          # Les schémas internes de Supabase (auth, storage…) ne nous servent pas.
+          docker run --rm --network host -v "$WORK:/work" \
+            -e PGSSLMODE=verify-full -e PGSSLROOTCERT=/work/ca.crt \
+            "$PG_TOOLS" pg_dump "$DATABASE_URL" \
+              --format=custom --no-owner --no-privileges \
+              --schema=public --schema=drizzle \
+              --file=/work/park-finder.dump
+          ls -lh "$WORK/park-finder.dump"
+
+      # Une sauvegarde qu'on n'a jamais restaurée ne prouve rien.
+      - name: Restore into a throwaway database
+        run: |
+          docker run -d --name restore-check -e POSTGRES_PASSWORD=postgres \
+            -p "$RESTORE_PORT:5432" "$POSTGIS_IMAGE" > /dev/null
+          local_psql() {
+            docker run --rm --network host -v "$WORK:/work" \
+              "$PG_TOOLS" psql "$1" -v ON_ERROR_STOP=1 -At -c "$2"
+          }
+          admin_url="postgresql://postgres:postgres@localhost:$RESTORE_PORT/postgres"
+          for attempt in $(seq 1 30); do
+            local_psql "$admin_url" 'select 1' > /dev/null 2>&1 && break
+            [ "$attempt" = 30 ] && { echo "The throwaway database did not start."; exit 1; }
+            sleep 2
+          done
+          # Base vierge (template0) : PostGIS installé dans le même schéma qu'en production.
+          local_psql "$admin_url" 'create database restore_check template template0'
+          local_psql "$RESTORE_URL" "create schema if not exists \"$POSTGIS_SCHEMA\"; create extension postgis with schema \"$POSTGIS_SCHEMA\""
+          docker run --rm --network host -v "$WORK:/work" \
+            "$PG_TOOLS" pg_restore --no-owner --no-privileges --exit-on-error \
+              --dbname="$RESTORE_URL" /work/park-finder.dump
+
+          tables=$(local_psql "$RESTORE_URL" "select table_schema || '.' || table_name from information_schema.tables where table_schema in ('public', 'drizzle') and table_type = 'BASE TABLE' order by 1")
+          echo "$tables" | grep -qx 'public.parkings' || { echo "public.parkings is missing from the restored database."; exit 1; }
+          {
+            echo "### Backup $STAMP"
+            echo
+            echo "| Table | Rows |"
+            echo "|---|---|"
+            for table in $tables; do
+              echo "| $table | $(local_psql "$RESTORE_URL" "select count(*) from $table") |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Encrypt
+        env:
+          AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+        run: |
+          age --recipient "$AGE_RECIPIENT" \
+            --output "$WORK/park-finder.dump.age" "$WORK/park-finder.dump"
+          rm "$WORK/park-finder.dump"
+
+      # Clé Scaleway dédiée, limitée à l'écriture d'objets : ce workflow ne peut ni lire
+      # ni supprimer les sauvegardes existantes.
+      - name: Upload to Scaleway Object Storage
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SCW_BACKUP_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_BACKUP_SECRET_KEY }}
+          # Les sommes de contrôle par défaut des CLI AWS récentes ne sont pas acceptées
+          # par tous les stockages compatibles S3.
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          BUCKET: ${{ vars.BACKUP_BUCKET }}
+        run: |
+          key="daily/park-finder-$STAMP.dump.age"
+          aws s3 cp "$WORK/park-finder.dump.age" "s3://$BUCKET/$key" \
+            --endpoint-url https://s3.fr-par.scw.cloud --region fr-par --only-show-errors
+          echo "Uploaded s3://$BUCKET/$key"
+          echo "Stored as \`$key\`." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker rm -f restore-check > /dev/null 2>&1 || true
+          rm -rf "$WORK"
