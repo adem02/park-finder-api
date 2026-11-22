@@ -103,9 +103,13 @@ jobs:
           # Base vierge (template0) : PostGIS installé dans le même schéma qu'en production.
           local_psql "$admin_url" 'create database restore_check template template0'
           local_psql "$RESTORE_URL" "create schema if not exists \"$POSTGIS_SCHEMA\"; create extension postgis with schema \"$POSTGIS_SCHEMA\""
+          # `--schema=public` fait écrire `CREATE SCHEMA public` dans le dump, or ce schéma
+          # existe dans toute base neuve : on retire cette seule entrée de la liste à restaurer.
+          docker run --rm -v "$WORK:/work" "$PG_TOOLS" pg_restore --list /work/park-finder.dump \
+            | grep -vE '^[0-9]+; [0-9]+ [0-9]+ SCHEMA - public ' > "$WORK/restore.list"
           docker run --rm --network host -v "$WORK:/work" \
             "$PG_TOOLS" pg_restore --no-owner --no-privileges --exit-on-error \
-              --dbname="$RESTORE_URL" /work/park-finder.dump
+              --use-list=/work/restore.list --dbname="$RESTORE_URL" /work/park-finder.dump
 
           tables=$(local_psql "$RESTORE_URL" "select table_schema || '.' || table_name from information_schema.tables where table_schema in ('public', 'drizzle') and table_type = 'BASE TABLE' order by 1")
           echo "$tables" | grep -qx 'public.parkings' || { echo "public.parkings is missing from the restored database."; exit 1; }
