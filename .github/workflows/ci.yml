@@ -36,11 +36,11 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Format
-        run: npx prettier --check "src/**/*.ts" "test/**/*.ts"
+        run: npx prettier --check "src/**/*.ts" "test/**/*.ts" "seed/**/*.ts"
 
       # Sans --fix : la CI signale, elle ne modifie rien.
       - name: Lint
-        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+        run: npx eslint "{src,apps,libs,test,seed}/**/*.ts"
 
       - name: Typecheck
         run: npx tsc --noEmit -p tsconfig.json
