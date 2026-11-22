@@ -76,15 +76,34 @@ jobs:
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
           args: container container update ${{ vars.SCW_CONTAINER_ID }} registry-image=${{ env.IMAGE }} region=fr-par
 
-      - name: Redeploy the container
-        uses: scaleway/action-scw@v0
-        with:
-          version: v2.24.0
-          access-key: ${{ secrets.SCW_ACCESS_KEY }}
-          secret-key: ${{ secrets.SCW_SECRET_KEY }}
-          default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
-          default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-          args: container container redeploy ${{ vars.SCW_CONTAINER_ID }} region=fr-par --wait
+      # Changer l'image relance le déploiement (statut « pending »). On attend que le
+      # conteneur soit « ready » sur la nouvelle image, sinon le test passerait sur l'ancienne.
+      # La CLI installée par l'étape précédente est dans le PATH ; elle lit les clés dans l'env.
+      - name: Wait for the new version to be ready
+        env:
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+          SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+          SCW_DEFAULT_REGION: fr-par
+          CONTAINER_ID: ${{ vars.SCW_CONTAINER_ID }}
+        run: |
+          for attempt in $(seq 1 36); do
+            container=$(scw container container get "$CONTAINER_ID" -o json)
+            status=$(echo "$container" | jq -r '.status')
+            image=$(echo "$container" | jq -r '.registry_image')
+            echo "Attempt $attempt: status=$status"
+            if [ "$status" = "error" ]; then
+              echo "$container" | jq -r '.error_message'
+              exit 1
+            fi
+            if [ "$status" = "ready" ] && [ "$image" = "$IMAGE" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "The container did not become ready on $IMAGE within 6 minutes."
+          exit 1
 
       # 4. Le déploiement n'est réussi que si l'API répond et joint la base.
       - name: Smoke test
