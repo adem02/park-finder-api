@@ -17,6 +17,7 @@ import { DrizzleModule } from './infrastructure/orm/drizzle/drizzle.module';
 import { ParkingModule } from './modules/parking/parking.module';
 import { UserModule } from './modules/user/user.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     AuthModule,
     UserModule,
     CommonModule,
+    HealthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
