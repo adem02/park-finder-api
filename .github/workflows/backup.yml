@@ -24,7 +24,6 @@ jobs:
     timeout-minutes: 15
     environment: production
     env:
-      WORK: ${{ runner.temp }}/backup
       # pg_dump passe par le Session pooler (port 5432), comme les migrations.
       DATABASE_URL: ${{ secrets.DATABASE_MIGRATIONS_URL }}
       RESTORE_PORT: '5499'
@@ -41,6 +40,9 @@ jobs:
             *) echo "BACKUP_AGE_RECIPIENT must be an age public key (age1…)."; exit 1 ;;
           esac
           if [ -z "$BUCKET" ]; then echo "BACKUP_BUCKET is not set."; exit 1; fi
+          # Le contexte `runner` n'existe pas au niveau du job : dossier de travail fixé ici.
+          WORK="$RUNNER_TEMP/backup"
+          echo "WORK=$WORK" >> "$GITHUB_ENV"
           mkdir -p "$WORK"
           # Le certificat peut être collé sur une ligne avec des \n littéraux.
           printf '%s\n' "$DATABASE_SSL_CA" | sed 's/\\n/\n/g' > "$WORK/ca.crt"
