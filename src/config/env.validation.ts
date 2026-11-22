@@ -58,8 +58,24 @@ class EnvironmentVariables {
   @IsString()
   DATABASE_URL!: string;
 
+  // Redis is configured but not used by the app yet: optional, so a deployment
+  // does not need (and pay for) a Redis instance.
   @IsString()
-  REDIS_URL!: string;
+  @IsOptional()
+  REDIS_URL?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  DATABASE_POOL_MAX?: number;
+
+  @IsIn(['off', 'no-verify', 'verify'])
+  @IsOptional()
+  DATABASE_SSL?: string;
+
+  @IsString()
+  @IsOptional()
+  DATABASE_SSL_CA?: string;
 
   @IsUUID()
   JWT_SECRET!: string;
