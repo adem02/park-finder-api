@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsIn,
   validateSync,
+  IsUUID,
 } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { Type } from 'class-transformer';
@@ -20,35 +21,108 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  CORS_ORIGIN: string = 'http://localhost:3000';
+  CORS_ORIGIN: string = 'http://localhost:5190,http://localhost:4190';
 
   @IsString()
   @IsOptional()
   BASE_URL: string = 'http://localhost:3000';
 
-  // Database
   @IsString()
-  DB_USER!: string;
+  @IsOptional()
+  FRONTEND_URL: string = 'http://localhost:5190';
+
+  // Unused by the app itself (the real connection uses DATABASE_URL below),
+  // kept optional only because docker-compose's local postgres service still
+  // consumes these to configure its own container (POSTGRES_USER/PASSWORD/DB).
+  @IsString()
+  @IsOptional()
+  DB_USER?: string;
 
   @IsString()
-  DB_PASSWORD!: string;
+  @IsOptional()
+  DB_PASSWORD?: string;
 
   @IsString()
-  DB_NAME!: string;
+  @IsOptional()
+  DB_NAME?: string;
 
   @IsString()
-  DB_HOST!: string;
+  @IsOptional()
+  DB_HOST?: string;
 
   @IsNumber()
+  @IsOptional()
   @Type(() => Number)
   DB_PORT: number = 5432;
 
   @IsString()
   DATABASE_URL!: string;
 
-  // Redis
+  // Redis is configured but not used by the app yet: optional, so a deployment
+  // does not need (and pay for) a Redis instance.
   @IsString()
-  REDIS_URL!: string;
+  @IsOptional()
+  REDIS_URL?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  DATABASE_POOL_MAX?: number;
+
+  @IsIn(['off', 'no-verify', 'verify'])
+  @IsOptional()
+  DATABASE_SSL?: string;
+
+  @IsString()
+  @IsOptional()
+  DATABASE_SSL_CA?: string;
+
+  @IsUUID()
+  JWT_SECRET!: string;
+
+  @IsString()
+  JWT_EXPIRES_IN!: string;
+
+  @IsIn(['true', 'false'])
+  @IsOptional()
+  REFRESH_COOKIE_SECURE?: string;
+
+  @IsIn(['strict', 'lax', 'none'])
+  @IsOptional()
+  REFRESH_COOKIE_SAME_SITE?: string;
+
+  @IsString()
+  GOOGLE_CLIENT_ID!: string;
+
+  @IsString()
+  GOOGLE_CLIENT_SECRET!: string;
+
+  @IsString()
+  GOOGLE_CALLBACK_URL!: string;
+
+  @IsString()
+  APPLE_CLIENT_ID!: string;
+
+  @IsString()
+  APPLE_TEAM_ID!: string;
+
+  @IsString()
+  APPLE_KEY_ID!: string;
+
+  @IsString()
+  APPLE_PRIVATE_KEY!: string;
+
+  @IsString()
+  APPLE_CALLBACK_URL!: string;
+
+  @IsString()
+  CLOUDINARY_CLOUD_NAME!: string;
+
+  @IsString()
+  CLOUDINARY_API_KEY!: string;
+
+  @IsString()
+  CLOUDINARY_API_SECRET!: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

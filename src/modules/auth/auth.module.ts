@@ -1,0 +1,116 @@
+import { Module } from '@nestjs/common';
+import { AuthController } from './auth.controller';
+import { JwtTokenService } from './services/JwtToken.service';
+import { LoginUseCase } from '../../application/auth/Login.use-case';
+import { RegisterUseCase } from '../../application/auth/Register.use-case';
+import {
+  CREDENTIALS_REPOSITORY,
+  OPAQUE_TOKEN_SERVICE,
+  PASSWORD_SERVICE,
+  REFRESH_TOKEN_REPOSITORY,
+  TOKEN_SERVICE,
+  USER_REPOSITORY,
+} from '../../common/constants/injection-tokens.constants';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { BcryptPasswordService } from './services/BcryptPassword.service';
+import { AuthGuard } from './guards/JwtAuth.guard';
+import { GoogleStrategy } from './strategies/Google.strategy';
+import { AppleStrategy } from './strategies/Apple.strategy';
+import { OAuthProviders } from './oauth/OAuthProviders';
+import { OAuthRedirect } from './oauth/OAuthRedirect';
+import { OAuthStateCookieStore } from './oauth/OAuthStateCookieStore';
+import { OAuthUseCase } from '../../application/auth/OAuth.use-case';
+import { DrizzleUserRepository } from '../../infrastructure/orm/repositories/DrizzleUser.repository';
+import { DrizzleCredentialsRepository } from '../../infrastructure/orm/repositories/DrizzleCredentials.repository';
+import { RefreshTokenUseCase } from '../../application/auth/RefreshToken.use-case';
+import { LogoutUseCase } from '../../application/auth/Logout.use-case';
+import { SessionIssuer } from '../../application/auth/SessionIssuer';
+import { DrizzleRefreshTokenRepository } from '../../infrastructure/orm/repositories/DrizzleRefreshToken.repository';
+import { CryptoOpaqueTokenService } from './services/CryptoOpaqueToken.service';
+import { RefreshTokenCookie } from './RefreshTokenCookie';
+
+@Module({
+  imports: [
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get('jwt.secret'),
+        signOptions: { expiresIn: config.get('jwt.expiresIn') },
+      }),
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthGuard,
+    OAuthProviders,
+    OAuthStateCookieStore,
+    OAuthRedirect,
+    // Social providers are registered only when configured: with placeholder
+    // credentials, passport would refuse to build them and the API would not start.
+    {
+      provide: GoogleStrategy,
+      inject: [
+        ConfigService,
+        OAuthUseCase,
+        OAuthStateCookieStore,
+        OAuthProviders,
+      ],
+      useFactory: (
+        config: ConfigService,
+        oAuthUseCase: OAuthUseCase,
+        stateStore: OAuthStateCookieStore,
+        providers: OAuthProviders,
+      ) =>
+        providers.isConfigured('google')
+          ? new GoogleStrategy(config, oAuthUseCase, stateStore)
+          : null,
+    },
+    {
+      provide: AppleStrategy,
+      inject: [ConfigService, OAuthUseCase, OAuthProviders],
+      useFactory: (
+        config: ConfigService,
+        oAuthUseCase: OAuthUseCase,
+        providers: OAuthProviders,
+      ) =>
+        providers.isConfigured('apple')
+          ? new AppleStrategy(config, oAuthUseCase)
+          : null,
+    },
+    LoginUseCase,
+    RegisterUseCase,
+    RefreshTokenUseCase,
+    LogoutUseCase,
+    OAuthUseCase,
+    SessionIssuer,
+    RefreshTokenCookie,
+    {
+      provide: OPAQUE_TOKEN_SERVICE,
+      useClass: CryptoOpaqueTokenService,
+    },
+    {
+      provide: REFRESH_TOKEN_REPOSITORY,
+      useClass: DrizzleRefreshTokenRepository,
+    },
+    {
+      provide: TOKEN_SERVICE,
+      useClass: JwtTokenService,
+    },
+    {
+      provide: PASSWORD_SERVICE,
+      useClass: BcryptPasswordService,
+    },
+    {
+      provide: USER_REPOSITORY,
+      useClass: DrizzleUserRepository,
+    },
+    {
+      provide: CREDENTIALS_REPOSITORY,
+      useClass: DrizzleCredentialsRepository,
+    },
+  ],
+  exports: [AuthGuard, TOKEN_SERVICE],
+})
+export class AuthModule {}
