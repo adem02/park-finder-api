@@ -1,0 +1,226 @@
+{
+ "city": "Reims",
+ "collectedAt": "2026-11-22",
+ "source": "OpenStreetMap, classement parkings-data/reims/2026-11-22 (catégorie « gratuit », confiance haute, access=yes)",
+ "licence": "ODbL 1.0 — © contributeurs OpenStreetMap (https://www.openstreetmap.org/copyright)",
+ "names": "Noms absents d'OSM : rue la plus proche (géocodage inverse Géoplateforme IGN, Licence Ouverte 2.0)",
+ "parkings": [
+  {
+   "id": "osm-way-1062350955",
+   "name": "Parking rue André Chaillot",
+   "totalSpots": 52,
+   "latitude": 49.2866932,
+   "longitude": 4.0264807
+  },
+  {
+   "id": "osm-way-1078961190",
+   "name": "Parking rue de Courcelles",
+   "totalSpots": 6,
+   "latitude": 49.2642194,
+   "longitude": 4.0134831
+  },
+  {
+   "id": "osm-way-1107967958",
+   "name": "Parking rue Raymond Poincaré, près du n° 72",
+   "totalSpots": 37,
+   "latitude": 49.2827403,
+   "longitude": 4.0197907
+  },
+  {
+   "id": "osm-way-1148275641",
+   "name": "Parking rue de Louvois",
+   "totalSpots": 22,
+   "latitude": 49.2380211,
+   "longitude": 4.0321329
+  },
+  {
+   "id": "osm-way-1456893707",
+   "name": "Parking rue Jacques de La Giraudière",
+   "totalSpots": 195,
+   "latitude": 49.2388875,
+   "longitude": 4.0862892
+  },
+  {
+   "id": "osm-way-225662968",
+   "name": "Parking boulevard Albert 1er",
+   "totalSpots": 176,
+   "latitude": 49.2650109,
+   "longitude": 4.0092415
+  },
+  {
+   "id": "osm-way-225666531",
+   "name": "Parking Stade Delaune P4",
+   "totalSpots": 416,
+   "latitude": 49.2481741,
+   "longitude": 4.0230008
+  },
+  {
+   "id": "osm-way-31328175",
+   "name": "Place René Clair",
+   "totalSpots": 30,
+   "latitude": 49.2134105,
+   "longitude": 4.02606
+  },
+  {
+   "id": "osm-way-323471911",
+   "name": "Parking avenue Georges Clemenceau",
+   "totalSpots": 240,
+   "latitude": 49.2521464,
+   "longitude": 4.0465693
+  },
+  {
+   "id": "osm-way-394051232",
+   "name": "Parking rue Raymond Poincaré, près du n° 64",
+   "totalSpots": 58,
+   "latitude": 49.2822809,
+   "longitude": 4.0181001
+  },
+  {
+   "id": "osm-way-394051341",
+   "name": "Parking rue de Bétheny - la Neuvillette",
+   "totalSpots": 74,
+   "latitude": 49.2878417,
+   "longitude": 4.0139251
+  },
+  {
+   "id": "osm-way-41532800",
+   "name": "Parking Philippe Moroni",
+   "totalSpots": 471,
+   "latitude": 49.2457185,
+   "longitude": 4.0265725
+  },
+  {
+   "id": "osm-way-494436296",
+   "name": "Parking rue Camille Saint-Saëns",
+   "totalSpots": 113,
+   "latitude": 49.2123304,
+   "longitude": 4.0266294
+  },
+  {
+   "id": "osm-way-494436297",
+   "name": "Parking rue Igor Stravinsky",
+   "totalSpots": 13,
+   "latitude": 49.2117817,
+   "longitude": 4.0254789
+  },
+  {
+   "id": "osm-way-557020461",
+   "name": "Parking avenue de l'Europe",
+   "totalSpots": 29,
+   "latitude": 49.247191,
+   "longitude": 4.0646577
+  },
+  {
+   "id": "osm-way-592748281",
+   "name": "Parking Hôpital Debré",
+   "totalSpots": 212,
+   "latitude": 49.2258563,
+   "longitude": 4.0193949
+  },
+  {
+   "id": "osm-way-662913075",
+   "name": "Parking Galerie des Baléares",
+   "totalSpots": 41,
+   "latitude": 49.248667,
+   "longitude": 4.0637577
+  },
+  {
+   "id": "osm-way-768637256",
+   "name": "Parking rue Richelieu",
+   "totalSpots": 4,
+   "latitude": 49.2121322,
+   "longitude": 4.0226881
+  },
+  {
+   "id": "osm-way-768641463",
+   "name": "Parking esplanade Ernest Hemingway",
+   "totalSpots": 6,
+   "latitude": 49.2118629,
+   "longitude": 4.0189649
+  },
+  {
+   "id": "osm-way-776731532",
+   "name": "Parking impasse Léo Lagrange",
+   "totalSpots": 68,
+   "latitude": 49.2428037,
+   "longitude": 4.0245902
+  },
+  {
+   "id": "osm-way-777425022",
+   "name": "Parking Chaussée Saint-Martin",
+   "totalSpots": 182,
+   "latitude": 49.2410035,
+   "longitude": 4.0315751
+  },
+  {
+   "id": "osm-way-777518938",
+   "name": "Parking Basilique Saint-Remi",
+   "totalSpots": 55,
+   "latitude": 49.2423017,
+   "longitude": 4.041519
+  },
+  {
+   "id": "osm-way-787504570",
+   "name": "Parking rue d'Archiac",
+   "totalSpots": 41,
+   "latitude": 49.2613892,
+   "longitude": 4.0584944
+  },
+  {
+   "id": "osm-way-787919890",
+   "name": "Parking rue du Docteur Albert Schweitzer",
+   "totalSpots": 33,
+   "latitude": 49.2769898,
+   "longitude": 4.021534
+  },
+  {
+   "id": "osm-way-796512496",
+   "name": "Parking rue de Chevigné",
+   "totalSpots": 2,
+   "latitude": 49.2526302,
+   "longitude": 4.0476954
+  },
+  {
+   "id": "osm-way-860580659",
+   "name": "Parking rue Ledru-Rollin",
+   "totalSpots": 59,
+   "latitude": 49.2386895,
+   "longitude": 4.0345108
+  },
+  {
+   "id": "osm-way-933912081",
+   "name": "Parking rue Maxime Gorki",
+   "totalSpots": 16,
+   "latitude": 49.2114726,
+   "longitude": 4.0201426
+  },
+  {
+   "id": "osm-way-93399108",
+   "name": "Parking René Tys",
+   "totalSpots": 250,
+   "latitude": 49.244459,
+   "longitude": 4.0262735
+  },
+  {
+   "id": "osm-way-93880063",
+   "name": "Parking rue Joannes Brochet, près du n° 2d",
+   "totalSpots": 252,
+   "latitude": 49.2884043,
+   "longitude": 4.0259154
+  },
+  {
+   "id": "osm-way-93880088",
+   "name": "Parking rue Joannes Brochet",
+   "totalSpots": 32,
+   "latitude": 49.2890576,
+   "longitude": 4.0248357
+  },
+  {
+   "id": "osm-way-93882428",
+   "name": "Parking rue Francis Garnier",
+   "totalSpots": 243,
+   "latitude": 49.2884034,
+   "longitude": 4.0224981
+  }
+ ]
+}

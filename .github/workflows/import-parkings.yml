@@ -1,0 +1,55 @@
+name: Import parkings
+
+# Lancé à la main (Actions → Import parkings → Run workflow), jamais automatiquement.
+# Par défaut, simulation : le bilan s'affiche et rien n'est écrit. Cocher « apply » pour écrire.
+# Rejouable sans risque : les parkings déjà présents (ou à moins de 50 m) sont ignorés.
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: Fichier préparé par parkings-data/scripts/build_prod_import.py
+        default: seed/production/reims-free-parkings.json
+        required: true
+      apply:
+        description: Écrire en base (sinon simulation)
+        type: boolean
+        default: false
+
+# Jamais en même temps qu'un déploiement : celui-ci applique les migrations.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    name: import
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Import
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_MIGRATIONS_URL }}
+          DATABASE_SSL: verify
+          DATABASE_SSL_CA: ${{ secrets.DATABASE_SSL_CA }}
+          FILE: ${{ inputs.file }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          if [ "$APPLY" = "true" ]; then
+            yarn import:parkings "$FILE" --apply
+          else
+            yarn import:parkings "$FILE"
+          fi
