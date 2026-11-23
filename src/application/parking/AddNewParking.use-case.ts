@@ -74,15 +74,16 @@ export class AddNewParkingUseCase {
     const photoUrls = await this.storageService.uploadMany(request.photos);
 
     try {
+      // Un parking naît sans photo : addPhotos() les rattache et vérifie la limite de 3.
       const newParking = Parking.create({
         id: UuidGenerator.Generate(),
         name: request.name,
         totalSpots: request.totalSpots,
-        photos: photoUrls,
+        photos: [],
         coordinates: coordinates,
         addedBy: user,
         createdAt: new Date(),
-      });
+      }).addPhotos(photoUrls);
 
       await this.parkingRepository.create(newParking);
 
