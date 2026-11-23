@@ -116,6 +116,17 @@ describe('AddNewParkingUseCase', () => {
       expect(result.id).toBeDefined();
     });
 
+    it('should save the uploaded photo URLs with the parking', async () => {
+      const { useCase, parkingRepository } = makeUseCase();
+
+      await useCase.execute(validRequest);
+
+      const [saved] = (parkingRepository.create as jest.Mock).mock.calls[0] as [
+        Parking,
+      ];
+      expect(saved.photos).toEqual(['https://example.com/photo.jpg']);
+    });
+
     it('should check for nearby parkings with radius 50m and limit 1', async () => {
       const { useCase, parkingRepository } = makeUseCase();
 
