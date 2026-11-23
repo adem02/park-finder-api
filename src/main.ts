@@ -38,8 +38,8 @@ async function bootstrap() {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Park Finder')
-    .setDescription('Park Finder API')
+    .setTitle('PlaceGratos')
+    .setDescription('PlaceGratos API')
     .setVersion('1.0')
     .addBearerAuth()
     .addCookieAuth(REFRESH_COOKIE_NAME)
