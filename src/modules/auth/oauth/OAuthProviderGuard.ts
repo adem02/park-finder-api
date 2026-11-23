@@ -30,7 +30,7 @@ export function OAuthProviderGuard(provider: OAuthProvider): Type<IAuthGuard> {
     }
 
     /**
-     * Google: always show the account chooser. Signing out of ParkFinder does not sign
+     * Google: always show the account chooser. Signing out of PlaceGratos does not sign
      * out of Google, so without it the user would be signed back in silently, with no
      * way to pick another account or to cancel.
      */
