@@ -2,4 +2,5 @@ export const POINTS_PER_ACTION = {
   PARKING_ADDED: 20,
   AVAILABILITY_REPORTED: 5,
   VOTE_CAST: 1,
+  PHOTO_ADDED: 5,
 } as const;

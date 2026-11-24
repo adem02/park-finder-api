@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { AddNewParkingUseCase } from '../../application/parking/AddNewParking.use-case';
 import { DeleteParkingUseCase } from '../../application/parking/DeleteParking.use-case';
+import { AddParkingPhotosUseCase } from '../../application/parking/AddParkingPhotos.use-case';
+import { RemoveParkingPhotoUseCase } from '../../application/parking/RemoveParkingPhoto.use-case';
 import { NewParkingInputDto } from './dto/NewParking.dto';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import type { DecodedToken } from '../../application/types/auth.types';
@@ -59,6 +61,8 @@ export class ParkingController {
     private readonly commentUseCase: CommentParkingUseCase,
     private readonly listParkingCommentsUseCase: ListParkingCommentsUseCase,
     private readonly deleteParkingUseCase: DeleteParkingUseCase,
+    private readonly addParkingPhotosUseCase: AddParkingPhotosUseCase,
+    private readonly removeParkingPhotoUseCase: RemoveParkingPhotoUseCase,
   ) {}
 
   @Post('new')
@@ -177,6 +181,52 @@ export class ParkingController {
   ): Promise<void> {
     await this.deleteParkingUseCase.execute({
       parkingId: id,
+      userId: user.userId,
+    });
+  }
+
+  @Post(':id/photos')
+  @UseInterceptors(FilesInterceptor('photos', 3))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Add photos to a parking (any user, 3 photos at most in all)',
+  })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 201, description: 'Photos added' })
+  @ApiResponse({ status: 409, description: 'The parking already has 3 photos' })
+  async addPhotos(
+    @Param('id') id: string,
+    @GetUser() user: DecodedToken,
+    @UploadedFiles(new FileValidationPipe()) files: Array<Express.Multer.File>,
+  ) {
+    return this.addParkingPhotosUseCase.execute({
+      parkingId: id,
+      userId: user.userId,
+      photos: (files ?? []).map((file) => ({
+        buffer: file.buffer,
+        mimetype: file.mimetype,
+        originalname: file.originalname,
+        size: file.size,
+      })),
+    });
+  }
+
+  @Delete(':id/photos/:photoId')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Remove a photo you posted' })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiParam({ name: 'photoId', description: 'Photo id' })
+  @ApiResponse({ status: 204, description: 'Photo removed' })
+  @ApiResponse({ status: 403, description: 'Not posted by you' })
+  @ApiResponse({ status: 404, description: 'Photo not found' })
+  async removePhoto(
+    @Param('id') id: string,
+    @Param('photoId') photoId: string,
+    @GetUser() user: DecodedToken,
+  ): Promise<void> {
+    await this.removeParkingPhotoUseCase.execute({
+      parkingId: id,
+      photoId,
       userId: user.userId,
     });
   }

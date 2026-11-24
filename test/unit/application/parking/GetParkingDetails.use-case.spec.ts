@@ -11,6 +11,7 @@ import type { ParkingRepository } from '../../../../src/application/gateway/Park
 import type { AvailabilityRepository } from '../../../../src/application/gateway/Availability.repository';
 import type { VoteRepository } from '../../../../src/application/gateway/Vote.repository';
 import type { CommentRepository } from '../../../../src/application/gateway/Comment.repository';
+import type { ParkingPhotoRepository } from '../../../../src/application/gateway/ParkingPhoto.repository';
 import { Comment } from '../../../../src/domain/entities/Comment';
 
 const makeUser = (id = 'user-1', username = 'johndoe') =>
@@ -108,6 +109,7 @@ const makeUseCase = (
     availability?: Partial<jest.Mocked<AvailabilityRepository>>;
     vote?: Partial<jest.Mocked<VoteRepository>>;
     comment?: Partial<jest.Mocked<CommentRepository>>;
+    photos?: Partial<jest.Mocked<ParkingPhotoRepository>>;
   } = {},
 ) => {
   const parkingRepository = makeParkingRepository(overrides.parking);
@@ -116,11 +118,19 @@ const makeUseCase = (
   );
   const voteRepository = makeVoteRepository(overrides.vote);
   const commentRepository = makeCommentRepository(overrides.comment);
+  const parkingPhotoRepository = {
+    findByParkingId: jest.fn().mockResolvedValue([]),
+    findById: jest.fn(),
+    add: jest.fn(),
+    remove: jest.fn(),
+    ...overrides.photos,
+  } as jest.Mocked<ParkingPhotoRepository>;
   const useCase = new GetParkingDetailsUseCase(
     parkingRepository,
     availabilityRepository,
     voteRepository,
     commentRepository,
+    parkingPhotoRepository,
   );
   return {
     useCase,
@@ -252,6 +262,41 @@ describe('GetParkingDetailsUseCase', () => {
         3,
       );
       expect(result.recentComments).toBe(comments);
+    });
+
+    it('lists the photos and flags the ones the user posted', async () => {
+      const { useCase } = makeUseCase({
+        photos: {
+          findByParkingId: jest.fn().mockResolvedValue([
+            {
+              id: 'ph-1',
+              parkingId: 'parking-1',
+              url: 'https://a.jpg',
+              addedById: 'user-1',
+              awardedPoints: 5,
+              createdAt: new Date(),
+            },
+            {
+              id: 'ph-2',
+              parkingId: 'parking-1',
+              url: 'https://b.jpg',
+              addedById: 'other',
+              awardedPoints: 5,
+              createdAt: new Date(),
+            },
+          ]),
+        },
+      });
+
+      const response = await useCase.execute({
+        id: 'parking-1',
+        userId: 'user-1',
+      });
+
+      expect(response.photoItems).toEqual([
+        { id: 'ph-1', url: 'https://a.jpg', isMine: true },
+        { id: 'ph-2', url: 'https://b.jpg', isMine: false },
+      ]);
     });
   });
 });
