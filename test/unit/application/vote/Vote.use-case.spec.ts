@@ -62,6 +62,7 @@ const makeUserRepository = (
   updateById: jest.fn(),
   updatePointsById: jest.fn().mockResolvedValue(undefined),
   deleteById: jest.fn(),
+  anonymize: jest.fn(),
   findStatsByUserId: jest.fn(),
   ...overrides,
 });

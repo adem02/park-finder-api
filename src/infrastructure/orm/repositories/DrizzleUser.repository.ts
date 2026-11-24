@@ -4,7 +4,18 @@ import { UserRepository } from '../../../application/gateway/User.repository';
 import { User } from '../../../domain/entities/User';
 import { UserStats } from '../../../domain/types/user.types';
 import { DrizzleService } from '../drizzle/Drizzle.service';
-import { availabilityReports, parkings, users, votes } from '../drizzle/schema';
+import {
+  availabilityReports,
+  comments,
+  monthlyLeaderboard,
+  parkings,
+  refreshTokens,
+  userBadges,
+  userCredentials,
+  users,
+  votes,
+} from '../drizzle/schema';
+import { DELETED_USERNAME_PREFIX } from '../../../domain/constants/user.constants';
 import { UserMapper } from '../mapper/User.mapper';
 
 @Injectable()
@@ -58,6 +69,55 @@ export class DrizzleUserRepository implements UserRepository {
 
   async deleteById(id: string): Promise<void> {
     await this.drizzleService.db.delete(users).where(eq(users.id, id));
+  }
+
+  async anonymize(
+    id: string,
+    parkingsHeir: { id: string; username: string },
+  ): Promise<void> {
+    await this.drizzleService.db.transaction(async (tx) => {
+      await tx
+        .insert(users)
+        .values({ ...parkingsHeir, email: null })
+        .onConflictDoNothing({ target: users.id });
+      await tx
+        .update(parkings)
+        .set({ addedById: parkingsHeir.id })
+        .where(eq(parkings.addedById, id));
+
+      await tx.delete(comments).where(eq(comments.authorId, id));
+      await tx.delete(userBadges).where(eq(userBadges.userId, id));
+      await tx.delete(refreshTokens).where(eq(refreshTokens.userId, id));
+      await tx.delete(userCredentials).where(eq(userCredentials.userId, id));
+
+      // Leaving the leaderboard shifts the others up: ranks of the affected months are recomputed.
+      const leftMonths = await tx
+        .delete(monthlyLeaderboard)
+        .where(eq(monthlyLeaderboard.userId, id))
+        .returning({ month: monthlyLeaderboard.month });
+      for (const { month } of leftMonths) {
+        await tx.execute(sql`
+          UPDATE monthly_leaderboard ml
+          SET rank = sub.rnk
+          FROM (
+            SELECT id, RANK() OVER (ORDER BY "monthlyPoints" DESC) AS rnk
+            FROM monthly_leaderboard
+            WHERE month = ${month}
+          ) sub
+          WHERE ml.id = sub.id AND ml.month = ${month}
+        `);
+      }
+
+      await tx
+        .update(users)
+        .set({
+          username: `${DELETED_USERNAME_PREFIX}${id.replace(/-/g, '').slice(0, 12)}`,
+          email: null,
+          photoUrl: null,
+          points: 0,
+        })
+        .where(eq(users.id, id));
+    });
   }
 
   async findStatsByUserId(userId: string): Promise<UserStats> {

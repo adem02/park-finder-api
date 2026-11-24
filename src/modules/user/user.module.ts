@@ -14,6 +14,8 @@ import { GetUserProfileUseCase } from '../../application/user/GetUserProfile.use
 import { GetLeaderboardUseCase } from '../../application/leaderboard/GetLeaderboard.use-case';
 import { AwardPointsUseCase } from '../../application/points/AwardPoints.use-case';
 import { CheckBadgesUseCase } from '../../application/badge/CheckBadges.use-case';
+import { DeleteAccountUseCase } from '../../application/user/DeleteAccount.use-case';
+import { RefreshTokenCookie } from '../auth/RefreshTokenCookie';
 
 @Module({
   controllers: [UserController],
@@ -26,6 +28,8 @@ import { CheckBadgesUseCase } from '../../application/badge/CheckBadges.use-case
     GetLeaderboardUseCase,
     CheckBadgesUseCase,
     AwardPointsUseCase,
+    DeleteAccountUseCase,
+    RefreshTokenCookie,
   ],
   exports: [AwardPointsUseCase, CheckBadgesUseCase, GetLeaderboardUseCase],
 })

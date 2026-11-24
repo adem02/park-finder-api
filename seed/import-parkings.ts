@@ -10,6 +10,7 @@ import {
   PARKING_TOTAL_SPOTS_MAX,
   PARKING_TOTAL_SPOTS_MIN,
 } from '../src/domain/constants/parking.constants';
+import { SYSTEM_USER } from '../src/domain/constants/user.constants';
 
 /**
  * Importe des parkings réels, production comprise : aucune donnée fictive, contrairement à `yarn seed`.
@@ -24,10 +25,6 @@ import {
  * Usage : `yarn import:parkings [fichier] [--apply]`
  */
 
-export const SYSTEM_USER = {
-  id: 'system-placegratos',
-  username: 'PlaceGratos',
-};
 const DEFAULT_FILE = join(__dirname, 'production', 'reims-free-parkings.json');
 
 interface ImportedParking {
