@@ -84,4 +84,65 @@ describe('DrizzleParkingRepository (integration)', () => {
       expect(parking).toBeNull();
     });
   });
+
+  describe('hasContributionsFromOthers', () => {
+    it('is false when only the author voted, commented or reported', async () => {
+      const author = await factory.user().create();
+      const parking = await factory.parking().addedBy(author.id).create();
+      await factory.vote().forParking(parking.id).votedBy(author.id).create();
+      await factory
+        .comment()
+        .forParking(parking.id)
+        .writtenBy(author.id)
+        .create();
+      await factory
+        .availabilityReport()
+        .forParking(parking.id)
+        .reportedBy(author.id)
+        .create();
+
+      expect(
+        await repository.hasContributionsFromOthers(parking.id, author.id),
+      ).toBe(false);
+    });
+
+    it('is true as soon as someone else voted', async () => {
+      const author = await factory.user().create();
+      const other = await factory.user().withUsername('other').create();
+      const parking = await factory.parking().addedBy(author.id).create();
+      await factory.vote().forParking(parking.id).votedBy(other.id).create();
+
+      expect(
+        await repository.hasContributionsFromOthers(parking.id, author.id),
+      ).toBe(true);
+    });
+
+    it('is true as soon as someone else commented or reported', async () => {
+      const author = await factory.user().create();
+      const other = await factory.user().withUsername('other').create();
+      const commented = await factory.parking().addedBy(author.id).create();
+      const reported = await factory
+        .parking()
+        .addedBy(author.id)
+        .withCoordinates(49.3, 4.1)
+        .create();
+      await factory
+        .comment()
+        .forParking(commented.id)
+        .writtenBy(other.id)
+        .create();
+      await factory
+        .availabilityReport()
+        .forParking(reported.id)
+        .reportedBy(other.id)
+        .create();
+
+      expect(
+        await repository.hasContributionsFromOthers(commented.id, author.id),
+      ).toBe(true);
+      expect(
+        await repository.hasContributionsFromOthers(reported.id, author.id),
+      ).toBe(true);
+    });
+  });
 });

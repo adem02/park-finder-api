@@ -245,4 +245,22 @@ export class DrizzleParkingRepository implements ParkingRepository {
   async deleteById(id: string): Promise<void> {
     await this.drizzleService.db.delete(parkings).where(eq(parkings.id, id));
   }
+
+  async hasContributionsFromOthers(
+    parkingId: string,
+    authorId: string,
+  ): Promise<boolean> {
+    const { rows } = await this.drizzleService.db.execute<{
+      contributed: boolean;
+    }>(sql`
+      SELECT
+        EXISTS (SELECT 1 FROM votes WHERE "parkingId" = ${parkingId} AND "votedById" <> ${authorId})
+        OR EXISTS (SELECT 1 FROM comments WHERE "parkingId" = ${parkingId} AND "authorId" <> ${authorId})
+        OR EXISTS (
+          SELECT 1 FROM availability_reports
+          WHERE "parkingId" = ${parkingId} AND "reportedById" <> ${authorId}
+        ) AS contributed
+    `);
+    return rows[0]?.contributed === true;
+  }
 }

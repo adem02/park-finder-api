@@ -26,6 +26,7 @@ const makeLeaderboardRepository = (
     .fn()
     .mockResolvedValue({ rank: 5, percentile: '5%', monthlyPoints: 50 }),
   addPoints: jest.fn(),
+  withdrawPoints: jest.fn(),
   reset: jest.fn(),
   ...overrides,
 });

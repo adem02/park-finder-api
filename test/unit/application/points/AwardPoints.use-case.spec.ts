@@ -28,6 +28,7 @@ const makeUserRepository = (
   deleteById: jest.fn(),
   anonymize: jest.fn(),
   updatePointsById: jest.fn().mockResolvedValue(undefined),
+  withdrawPointsById: jest.fn(),
   findStatsByUserId: jest.fn(),
   ...overrides,
 });
@@ -38,6 +39,7 @@ const makeLeaderboardRepository = (
   getMonthly: jest.fn(),
   getUserRankInfo: jest.fn(),
   addPoints: jest.fn().mockResolvedValue(undefined),
+  withdrawPoints: jest.fn(),
   reset: jest.fn(),
   ...overrides,
 });

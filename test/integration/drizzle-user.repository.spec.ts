@@ -259,4 +259,29 @@ describe('DrizzleUserRepository (integration)', () => {
       expect(entries[0].rank).toBe(1);
     });
   });
+
+  describe('withdrawPointsById', () => {
+    it('takes points back, never below zero', async () => {
+      const rich = await factory
+        .user()
+        .withUsername('rich')
+        .withPoints(50)
+        .create();
+      const poor = await factory
+        .user()
+        .withUsername('poor')
+        .withPoints(5)
+        .create();
+
+      await repository.withdrawPointsById(rich.id, 20);
+      await repository.withdrawPointsById(poor.id, 20);
+
+      expect((await repository.findById(rich.id))?.pointsBalance.points).toBe(
+        30,
+      );
+      expect((await repository.findById(poor.id))?.pointsBalance.points).toBe(
+        0,
+      );
+    });
+  });
 });
