@@ -1,5 +1,6 @@
 import { CoordinatesVO } from '../../src/domain/value-objects/Coordinates.vo';
 import { DrizzleParkingRepository } from '../../src/infrastructure/orm/repositories/DrizzleParking.repository';
+import { parkingPhotos } from '../../src/infrastructure/orm/drizzle/schema';
 import {
   createTestDatabase,
   TestDatabase,
@@ -111,6 +112,22 @@ describe('DrizzleParkingRepository (integration)', () => {
       const other = await factory.user().withUsername('other').create();
       const parking = await factory.parking().addedBy(author.id).create();
       await factory.vote().forParking(parking.id).votedBy(other.id).create();
+
+      expect(
+        await repository.hasContributionsFromOthers(parking.id, author.id),
+      ).toBe(true);
+    });
+
+    it('is true as soon as someone else posted a photo', async () => {
+      const author = await factory.user().create();
+      const other = await factory.user().withUsername('other').create();
+      const parking = await factory.parking().addedBy(author.id).create();
+      await testDb.drizzleService.db.insert(parkingPhotos).values({
+        id: 'photo-1',
+        parkingId: parking.id,
+        url: 'https://cdn/photo.jpg',
+        addedById: other.id,
+      });
 
       expect(
         await repository.hasContributionsFromOthers(parking.id, author.id),

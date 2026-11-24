@@ -1,6 +1,7 @@
 export * from './Storage.service';
 export * from './Availability.repository';
 export * from './Parking.repository';
+export * from './ParkingPhoto.repository';
 export * from './User.repository';
 export * from './Vote.repository';
 export * from './Badge.repository';
