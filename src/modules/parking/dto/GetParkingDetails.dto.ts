@@ -51,6 +51,17 @@ class VotesResponseDto {
   userVote: VoteType | null;
 }
 
+export class ParkingPhotoItemResponseDto {
+  @ApiProperty({ example: 'f2c1…' })
+  id!: string;
+
+  @ApiProperty({ example: 'https://cdn.example.com/photo.jpg' })
+  url!: string;
+
+  @ApiProperty({ description: 'True if the requesting user posted this photo' })
+  isMine!: boolean;
+}
+
 export class GetParkingDetailsOutputDTO {
   @ApiProperty({ example: 'a1b2c3d4-...' })
   readonly id: string;
@@ -66,6 +77,13 @@ export class GetParkingDetailsOutputDTO {
     example: ['https://cdn.example.com/photo.jpg'],
   })
   readonly photos: ReadonlyArray<string>;
+
+  @ApiProperty({
+    type: [ParkingPhotoItemResponseDto],
+    description:
+      'Same photos as `photos`, with an id and whether the user posted it',
+  })
+  readonly photoItems: ParkingPhotoItemResponseDto[];
 
   @ApiProperty({ type: CoordinatesResponseDto })
   readonly coordinates: CoordinatesResponseDto;
@@ -96,6 +114,7 @@ export class GetParkingDetailsOutputDTO {
     this.name = parking.name;
     this.totalSpots = parking.totalSpots;
     this.photos = parking.photos;
+    this.photoItems = response.photoItems.map((photo) => ({ ...photo }));
     this.coordinates = parking.coordinates;
     this.addedBy = {
       id: addedBy.id,

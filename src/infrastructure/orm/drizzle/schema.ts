@@ -85,6 +85,37 @@ export const parkings = pgTable(
   (table) => [index('parkings_location_idx').using('gist', table.location)],
 );
 
+/**
+ * Photo ledger: who posted which photo. `parkings.photos` stays the display list read everywhere;
+ * both are always written together, in one transaction (DrizzleParkingRepository.create and
+ * DrizzleParkingPhotoRepository).
+ */
+export const parkingPhotos = pgTable(
+  'parking_photos',
+  {
+    id: text('id').notNull().primaryKey(),
+    parkingId: text('parkingId')
+      .notNull()
+      .references(() => parkings.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+    url: text('url').notNull(),
+    /** Points given for this photo (0 for photos posted with the parking), taken back on removal. */
+    awardedPoints: integer('awardedPoints').notNull().default(0),
+    addedById: text('addedById')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    createdAt: timestamp('createdAt', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('parking_photos_parkingId_idx').on(table.parkingId),
+    unique('parking_photos_parkingId_url_key').on(table.parkingId, table.url),
+  ],
+);
+
 export const availabilityReports = pgTable(
   'availability_reports',
   {

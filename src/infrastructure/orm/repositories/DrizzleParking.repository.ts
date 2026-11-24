@@ -10,7 +10,8 @@ import type {
 import { CoordinatesVO } from '../../../domain/value-objects/Coordinates.vo';
 import { ParkingScoreVO } from '../../../domain/value-objects/ParkingScore.vo';
 import { DrizzleService } from '../drizzle/Drizzle.service';
-import { parkings, users, votes } from '../drizzle/schema';
+import { parkingPhotos, parkings, users, votes } from '../drizzle/schema';
+import { UuidGenerator } from '../../../common/utils/UuidGenerator';
 import { ParkingMapper } from '../mapper/Parking.mapper';
 import { AvailabilityMapper } from '../mapper/Availability.mapper';
 
@@ -196,6 +197,20 @@ export class DrizzleParkingRepository implements ParkingRepository {
         SET location = ST_SetSRID(ST_MakePoint(${parking.coordinates.longitude}, ${parking.coordinates.latitude}), 4326)::geography
         WHERE id = ${parking.id}
       `);
+
+      // Photos posted with the parking: in the ledger too, worth no points of their own.
+      if (parking.photos.length > 0) {
+        await tx.insert(parkingPhotos).values(
+          parking.photos.map((url) => ({
+            id: UuidGenerator.Generate(),
+            parkingId: parking.id,
+            url,
+            addedById: parking.addedBy.id,
+            awardedPoints: 0,
+            createdAt: parking.createdAt,
+          })),
+        );
+      }
     });
   }
 
@@ -256,6 +271,7 @@ export class DrizzleParkingRepository implements ParkingRepository {
       SELECT
         EXISTS (SELECT 1 FROM votes WHERE "parkingId" = ${parkingId} AND "votedById" <> ${authorId})
         OR EXISTS (SELECT 1 FROM comments WHERE "parkingId" = ${parkingId} AND "authorId" <> ${authorId})
+        OR EXISTS (SELECT 1 FROM parking_photos WHERE "parkingId" = ${parkingId} AND "addedById" <> ${authorId})
         OR EXISTS (
           SELECT 1 FROM availability_reports
           WHERE "parkingId" = ${parkingId} AND "reportedById" <> ${authorId}
