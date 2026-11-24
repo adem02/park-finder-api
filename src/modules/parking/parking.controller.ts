@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Query,
@@ -10,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AddNewParkingUseCase } from '../../application/parking/AddNewParking.use-case';
+import { DeleteParkingUseCase } from '../../application/parking/DeleteParking.use-case';
 import { NewParkingInputDto } from './dto/NewParking.dto';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import type { DecodedToken } from '../../application/types/auth.types';
@@ -56,6 +58,7 @@ export class ParkingController {
     private readonly cancelVoteUseCase: CancelVoteUseCase,
     private readonly commentUseCase: CommentParkingUseCase,
     private readonly listParkingCommentsUseCase: ListParkingCommentsUseCase,
+    private readonly deleteParkingUseCase: DeleteParkingUseCase,
   ) {}
 
   @Post('new')
@@ -154,6 +157,27 @@ export class ParkingController {
       userId: user.userId,
       parkingId: id,
       type: query.type,
+    });
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @ApiOperation({
+    summary:
+      'Delete a parking: author only, while no one else voted, commented or reported on it',
+  })
+  @ApiParam({ name: 'id', description: 'Parking UUID' })
+  @ApiResponse({ status: 204, description: 'Parking deleted' })
+  @ApiResponse({ status: 403, description: 'Not the author' })
+  @ApiResponse({ status: 404, description: 'Parking not found' })
+  @ApiResponse({ status: 409, description: 'Other users contributed to it' })
+  async deleteParking(
+    @Param('id') id: string,
+    @GetUser() user: DecodedToken,
+  ): Promise<void> {
+    await this.deleteParkingUseCase.execute({
+      parkingId: id,
+      userId: user.userId,
     });
   }
 

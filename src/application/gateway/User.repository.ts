@@ -8,6 +8,8 @@ export interface UserRepository {
   create(user: User): Promise<void>;
   updateById(id: string, updatedUser: User): Promise<void>;
   updatePointsById(id: string, points: number): Promise<void>;
+  /** Takes points back, never below 0. */
+  withdrawPointsById(id: string, points: number): Promise<void>;
   deleteById(id: string): Promise<void>;
   /**
    * Account deletion, in one transaction: parkings go to `parkingsHeir`, comments, badges,

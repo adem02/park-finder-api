@@ -68,6 +68,7 @@ const makeUserRepository = (
   deleteById: jest.fn(),
   anonymize: jest.fn(),
   updatePointsById: jest.fn(),
+  withdrawPointsById: jest.fn(),
   findStatsByUserId: jest.fn().mockResolvedValue(makeStats()),
   ...overrides,
 });
@@ -90,6 +91,7 @@ const makeParkingRepository = (
   create: jest.fn(),
   findByUserId: jest.fn().mockResolvedValue([]),
   deleteById: jest.fn(),
+  hasContributionsFromOthers: jest.fn(),
   ...overrides,
 });
 
