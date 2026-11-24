@@ -19,4 +19,9 @@ export interface ParkingRepository {
   create(parking: Parking): Promise<void>;
   findByUserId(userId: string): Promise<ParkingWithScore[]>;
   deleteById(id: string): Promise<void>;
+  /** True if anyone other than `authorId` voted, commented or reported availability on it. */
+  hasContributionsFromOthers(
+    parkingId: string,
+    authorId: string,
+  ): Promise<boolean>;
 }

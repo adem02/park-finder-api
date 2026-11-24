@@ -88,4 +88,32 @@ describe('DrizzleLeaderboardRepository (integration)', () => {
       expect(entries).toEqual([]);
     });
   });
+
+  describe('withdrawPoints', () => {
+    it('takes points back, never below zero, and re-ranks the month', async () => {
+      const alice = await factory.user().withUsername('alice').create();
+      const bob = await factory.user().withUsername('bob').create();
+      await repository.addPoints(alice.id, 30, month);
+      await repository.addPoints(bob.id, 25, month);
+
+      await repository.withdrawPoints(alice.id, 20, month);
+      await repository.withdrawPoints(bob.id, 40, month);
+
+      const entries = await repository.getMonthly(month);
+      expect(
+        entries.map((e) => [e.user.username, e.monthlyPoints, e.rank]),
+      ).toEqual([
+        ['alice', 10, 1],
+        ['bob', 0, 2],
+      ]);
+    });
+
+    it('does not create an entry for a month without points', async () => {
+      const alice = await factory.user().withUsername('alice').create();
+
+      await repository.withdrawPoints(alice.id, 20, month);
+
+      expect(await repository.getMonthly(month)).toHaveLength(0);
+    });
+  });
 });

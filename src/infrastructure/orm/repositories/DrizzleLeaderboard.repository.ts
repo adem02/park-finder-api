@@ -88,6 +88,26 @@ export class DrizzleLeaderboardRepository implements LeaderboardRepository {
     await this.recalculateRanks(month);
   }
 
+  async withdrawPoints(
+    userId: string,
+    points: number,
+    month: YearMonth,
+  ): Promise<void> {
+    await this.drizzleService.db
+      .update(monthlyLeaderboard)
+      .set({
+        monthlyPoints: sql`GREATEST(${monthlyLeaderboard.monthlyPoints} - ${points}, 0)`,
+      })
+      .where(
+        and(
+          eq(monthlyLeaderboard.userId, userId),
+          eq(monthlyLeaderboard.month, month),
+        ),
+      );
+
+    await this.recalculateRanks(month);
+  }
+
   async reset(month: YearMonth): Promise<void> {
     await this.drizzleService.db
       .delete(monthlyLeaderboard)

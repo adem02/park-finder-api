@@ -3,6 +3,7 @@ import { AddNewParkingUseCase } from '../../application/parking/AddNewParking.us
 import {
   AVAILABILITY_REPOSITORY,
   COMMENT_REPOSITORY,
+  LEADERBOARD_REPOSITORY,
   PARKING_REPOSITORY,
   STORAGE_SERVICE,
   USER_REPOSITORY,
@@ -25,6 +26,8 @@ import { CommentParkingUseCase } from '../../application/comment/CommentParking.
 import { ListParkingCommentsUseCase } from '../../application/comment/ListParkingComments.use-case';
 import { DrizzleCommentRepository } from '../../infrastructure/orm/repositories/DrizzleComment.repository';
 import { UserModule } from '../user/user.module';
+import { DeleteParkingUseCase } from '../../application/parking/DeleteParking.use-case';
+import { DrizzleLeaderboardRepository } from '../../infrastructure/orm/repositories/DrizzleLeaderboard.repository';
 
 @Module({
   imports: [
@@ -59,7 +62,9 @@ import { UserModule } from '../user/user.module';
       provide: COMMENT_REPOSITORY,
       useClass: DrizzleCommentRepository,
     },
+    { provide: LEADERBOARD_REPOSITORY, useClass: DrizzleLeaderboardRepository },
     AddNewParkingUseCase,
+    DeleteParkingUseCase,
     GetParkingDetailsUseCase,
     FindNearbyParkingsUseCase,
     ReportAvailabilityUseCase,

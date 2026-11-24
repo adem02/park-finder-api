@@ -41,6 +41,7 @@ const makeParkingRepository = (
   create: jest.fn(),
   findByUserId: jest.fn(),
   deleteById: jest.fn(),
+  hasContributionsFromOthers: jest.fn(),
   ...overrides,
 });
 
@@ -53,6 +54,7 @@ const makeUserRepository = (
   create: jest.fn(),
   updateById: jest.fn(),
   updatePointsById: jest.fn(),
+  withdrawPointsById: jest.fn(),
   deleteById: jest.fn(),
   anonymize: jest.fn(),
   findStatsByUserId: jest.fn(),

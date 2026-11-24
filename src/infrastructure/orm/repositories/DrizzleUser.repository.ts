@@ -148,6 +148,13 @@ export class DrizzleUserRepository implements UserRepository {
     };
   }
 
+  async withdrawPointsById(id: string, points: number): Promise<void> {
+    await this.drizzleService.db
+      .update(users)
+      .set({ points: sql`GREATEST(${users.points} - ${points}, 0)` })
+      .where(eq(users.id, id));
+  }
+
   async updatePointsById(id: string, points: number): Promise<void> {
     await this.drizzleService.db
       .update(users)

@@ -44,6 +44,7 @@ const makeUserRepository = (
   deleteById: jest.fn(),
   anonymize: jest.fn(),
   updatePointsById: jest.fn(),
+  withdrawPointsById: jest.fn(),
   findStatsByUserId: jest.fn(),
   ...overrides,
 });
