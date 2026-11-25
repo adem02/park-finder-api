@@ -87,6 +87,14 @@ class EnvironmentVariables {
   @IsOptional()
   REFRESH_COOKIE_SECURE?: string;
 
+  @IsIn(['json', 'text'])
+  @IsOptional()
+  LOG_FORMAT?: string;
+
+  @IsIn(['fatal', 'error', 'warn', 'log', 'debug', 'verbose'])
+  @IsOptional()
+  LOG_LEVEL?: string;
+
   @IsIn(['strict', 'lax', 'none'])
   @IsOptional()
   REFRESH_COOKIE_SAME_SITE?: string;
