@@ -86,3 +86,46 @@ jobs:
 
       - name: Integration tests
         run: yarn test:integration
+
+  image:
+    # L'image de prod exécute un bundle (scripts/bundle.mjs) : on la construit et on la démarre
+    # pour de vrai, pour qu'un bundle cassé ne puisse pas partir en production.
+    name: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build production image
+        run: docker build --target production -t park-finder-api:ci .
+
+      - name: Start the image
+        # Valeurs factices : pas de base (/health répond 503), aucun appel externe au démarrage.
+        run: |
+          cat > ci.env <<'EOF'
+          NODE_ENV=production
+          DATABASE_URL=postgresql://ci:ci@127.0.0.1:1/ci
+          DATABASE_SSL=off
+          JWT_SECRET=00000000-0000-4000-8000-000000000000
+          JWT_EXPIRES_IN=15m
+          GOOGLE_CLIENT_ID=ci
+          GOOGLE_CLIENT_SECRET=ci
+          GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+          APPLE_CLIENT_ID=ci
+          APPLE_TEAM_ID=ci
+          APPLE_KEY_ID=ci
+          APPLE_PRIVATE_KEY=ci
+          APPLE_CALLBACK_URL=http://localhost:3000/auth/apple/callback
+          CLOUDINARY_CLOUD_NAME=ci
+          CLOUDINARY_API_KEY=ci
+          CLOUDINARY_API_SECRET=ci
+          EOF
+          docker run -d --name api -p 3000:3000 --cpus=0.5 --memory=512m --env-file ci.env park-finder-api:ci
+
+      - name: Smoke test
+        run: sh scripts/smoke-test.sh http://localhost:3000
+
+      - name: Startup log
+        # Contient « ready N ms after start » : temps de démarrage à 0,5 vCPU, comme en prod.
+        if: always()
+        run: docker logs api

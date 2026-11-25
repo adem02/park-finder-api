@@ -29,9 +29,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN yarn build
-
-RUN yarn install --production --frozen-lockfile
+# Un seul fichier (dist/bundle/main.js) : voir scripts/bundle.mjs.
+RUN yarn build:bundle
 
 # Stage 4: Production
 FROM node:22.23.2-alpine AS production
@@ -40,8 +39,12 @@ WORKDIR /app
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/node_modules ./node_modules
+# Le bundle, plus les seuls paquets laissés hors du bundle (scripts/bundle.mjs) : bcrypt (natif,
+# avec node-gyp-build qui charge son binaire) et swagger-ui-dist (fichiers statiques de /api/docs).
+COPY --from=build /app/dist/bundle ./dist
+COPY --from=build /app/node_modules/bcrypt ./node_modules/bcrypt
+COPY --from=build /app/node_modules/node-gyp-build ./node_modules/node-gyp-build
+COPY --from=build /app/node_modules/swagger-ui-dist ./node_modules/swagger-ui-dist
 COPY --from=build /app/package.json ./
 
 USER appuser
