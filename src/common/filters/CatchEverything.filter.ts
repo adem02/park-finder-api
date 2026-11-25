@@ -33,7 +33,13 @@ export class CatchEverythingFilter implements ExceptionFilter {
           : 'Internal server error';
 
     if (!(exception instanceof HttpException)) {
-      this.logger.error(exception);
+      const req = ctx.getRequest<
+        Express.Request & { method?: string; originalUrl?: string }
+      >();
+      this.logger.error(
+        `Unhandled error on ${req.method} ${req.originalUrl?.split('?')[0]} [${req.requestId ?? 'no-request-id'}]`,
+        exception instanceof Error ? exception.stack : String(exception),
+      );
     }
 
     httpAdapter.reply(
