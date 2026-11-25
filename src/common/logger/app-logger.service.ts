@@ -6,6 +6,7 @@ import {
   Scope,
 } from '@nestjs/common';
 import { INQUIRER } from '@nestjs/core';
+import { loggerOptionsFromEnv } from './logger-options';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class AppLogger extends ConsoleLogger {
@@ -14,7 +15,7 @@ export class AppLogger extends ConsoleLogger {
     @Inject(INQUIRER)
     private readonly parentClass: object,
   ) {
-    super();
+    super('Application', loggerOptionsFromEnv());
 
     const context =
       this.parentClass?.constructor?.name &&

@@ -8,13 +8,12 @@ import cookieParser from 'cookie-parser';
 import { buildCorsOptions } from './config/cors';
 import { REFRESH_COOKIE_NAME } from './config/auth.config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { loggerOptionsFromEnv } from './common/logger/logger-options';
+import { requestLogging } from './common/logger/request-logging.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: new ConsoleLogger({
-      timestamp: true,
-      logLevels: ['log', 'error', 'warn', 'debug', 'verbose'],
-    }),
+    logger: new ConsoleLogger(loggerOptionsFromEnv()),
   });
   const config = app.get<ConfigType<typeof appConfig>>(appConfig.KEY);
   const logger = new Logger('Bootstrap');
@@ -25,6 +24,7 @@ async function bootstrap() {
     logger.warn('CORS_ORIGIN=* : every origin is allowed (development only).');
   }
 
+  app.use(requestLogging(new Logger('HTTP')));
   app.use(cookieParser());
 
   app.use(helmet());
@@ -50,7 +50,10 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, documentFactory);
 
   await app.listen(process.env.PORT ?? 3000);
-  logger.log(`Server running in ${config.nodeEnv} mode on port ${config.port}`);
+  // Time since the process started: on a cold start, how long the API itself took to be ready.
+  logger.log(
+    `Server running in ${config.nodeEnv} mode on port ${config.port}, ready ${Math.round(process.uptime() * 1000)} ms after start`,
+  );
 }
 bootstrap().catch((error: unknown) => {
   // A failed startup (bad config, port in use...) must stop the process with a clear log.
