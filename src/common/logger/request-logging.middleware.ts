@@ -4,11 +4,14 @@ import type { NextFunction, Request, Response } from 'express';
 
 export const REQUEST_ID_HEADER = 'X-Request-Id';
 const INCOMING_ID = /^[\w-]{8,64}$/;
+/** Enough to tell a bot from a browser and its version; longer values are cut. */
+export const USER_AGENT_MAX_LENGTH = 200;
 
 /**
- * One log line per request: method, path, status, duration and a request id, also sent back in
- * `X-Request-Id` so a user's failing request can be found in the logs. Never logs the query
- * string (it carries the user's position), headers, cookies or bodies.
+ * One log line per request: method, path, status, duration, user agent and a request id, also
+ * sent back in `X-Request-Id` so a user's failing request can be found in the logs. The user
+ * agent tells bots from browsers. Never logs the query string (it carries the user's position),
+ * the IP address, other headers, cookies or bodies.
  */
 export function requestLogging(logger: LoggerService) {
   return (request: Request, response: Response, next: NextFunction): void => {
@@ -27,6 +30,9 @@ export function requestLogging(logger: LoggerService) {
         path: request.originalUrl.split('?')[0],
         status: response.statusCode,
         durationMs: Math.round(durationMs),
+        userAgent: request
+          .header('user-agent')
+          ?.slice(0, USER_AGENT_MAX_LENGTH),
       };
       const line = `${entry.method} ${entry.path} ${entry.status} ${entry.durationMs}ms`;
 
