@@ -52,4 +52,8 @@ describe('poolConfigFromEnv', () => {
       /DATABASE_SSL/,
     );
   });
+
+  it('keeps idle connections for 5 minutes (reopening one to Supabase costs ~430 ms)', () => {
+    expect(poolConfigFromEnv(env({})).idleTimeoutMillis).toBe(300_000);
+  });
 });
