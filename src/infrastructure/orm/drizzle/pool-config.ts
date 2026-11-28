@@ -1,6 +1,9 @@
 import type { PoolConfig } from 'pg';
 
 const DEFAULT_POOL_MAX = 10;
+// Keep idle connections 5 min: reopening one to Supabase (TCP + TLS + auth) costs ~430 ms,
+// and staying under ~5 min avoids connections silently cut by the network.
+const IDLE_TIMEOUT_MS = 300_000;
 
 export type DatabaseSslMode = 'off' | 'no-verify' | 'verify';
 
@@ -18,6 +21,7 @@ export function poolConfigFromEnv(env: NodeJS.ProcessEnv): PoolConfig {
     connectionString: env.DATABASE_URL,
     max: poolMax(env.DATABASE_POOL_MAX),
     ssl: sslConfig(env),
+    idleTimeoutMillis: IDLE_TIMEOUT_MS,
   };
 }
 
